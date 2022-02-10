@@ -121,7 +121,7 @@ namespace LabelPrediction
                 CellsPerColumn = 25,
                 GlobalInhibition = true,
                 LocalAreaDensity = -1,
-                NumActiveColumnsPerInhArea = 0.02 * numColumns,
+                NumActiveColumnsPerInhArea = 0.04 * numColumns,
                 PotentialRadius = (int)(0.15 * inputBits),
                 //InhibitionRadius = 15,
 
@@ -140,7 +140,7 @@ namespace LabelPrediction
                 // Used by punishing of segments.
                 PredictedSegmentDecrement = 0.1,
 
-                NumInputs = 88
+                NumInputs = 88  //is not able to over´ride
             };
 
             return cfg;
