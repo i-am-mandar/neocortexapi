@@ -122,7 +122,7 @@ namespace LabelPrediction
                 GlobalInhibition = true,
                 LocalAreaDensity = -1,
                 NumActiveColumnsPerInhArea = 0.04 * numColumns,
-                PotentialRadius = (int)(0.15 * inputBits),
+                PotentialRadius = (int)(0.16 * inputBits),
                 //InhibitionRadius = 15,
 
                 MaxBoost = 10.0,
