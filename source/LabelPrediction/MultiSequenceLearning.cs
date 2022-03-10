@@ -33,8 +33,6 @@ namespace LabelPrediction
 
             List<Dictionary<string, int[]>> encodedData;
             EncoderBase encoderDateTime;
-            CortexLayer<object, object> trainedCortexLayer;
-            HtmClassifier<string, ComputeCycle> trainedClassifier;
             HtmPredictionEngine trainedEngine;
 
             PrepareTrainingData(sequenceFormatType, out encodedData, out encoderDateTime);
@@ -44,6 +42,12 @@ namespace LabelPrediction
             RunPrediction(trainedEngine);
         }
 
+        /// <summary>
+        /// Preparing Data for Learning - 1. Created MultiSequence and 2. Encoding Input
+        /// </summary>
+        /// <param name="sequenceFormatType"></param>
+        /// <param name="encodedData"></param>
+        /// <param name="encoderDateTime"></param>
         private static void PrepareTrainingData(string[] sequenceFormatType, out List<Dictionary<string, int[]>> encodedData, out EncoderBase encoderDateTime)
         {
             Console.WriteLine("Reading CSV File..");
@@ -56,19 +60,30 @@ namespace LabelPrediction
             encoderDateTime = HelperMethods.FetchDateTimeEncoder();
         }
 
+        /// <summary>
+        /// Getting trained model by MultiSequence Learning
+        /// </summary>
+        /// <param name="inputBits"></param>
+        /// <param name="maxCycles"></param>
+        /// <param name="numColumns"></param>
+        /// <param name="encodedData"></param>
+        /// <param name="encoderDateTime"></param>
+        /// <param name="trainedHTMmodel"></param>
         private void RunTraining(int inputBits, int maxCycles, int numColumns, List<Dictionary<string, int[]>> encodedData, EncoderBase encoderDateTime, out HtmPredictionEngine trainedHTMmodel)
         {
             Console.WriteLine("Started Learning...");
-
-            //
+            /*
+             * Running MultiSequence Learning experiment here
+             */
             trainedHTMmodel = Run(inputBits, maxCycles, numColumns, encoderDateTime, encodedData);
 
-
-            //trainedCortexLayer = trainedHTMmodel.Keys.ElementAt(0);
-            //trainedClassifier = trainedHTMmodel.Values.ElementAt(0);
             Console.WriteLine("Done Learning");
         }
 
+        /// <summary>
+        /// Takes user input and gives predicted label
+        /// </summary>
+        /// <param name="trainedEngine"></param>
         private static void RunPrediction(HtmPredictionEngine trainedEngine)
         {
             Debug.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
@@ -81,12 +96,17 @@ namespace LabelPrediction
                 if (userInput != null)
                 {
                     var sdr = HelperMethods.EncodeSingleInput(userInput);
-                    var predictedValuesForUserInput = trainedEngine.Predict(sdr);
-                    foreach (var predictedVal in predictedValuesForUserInput)
-                    {
-                        Console.WriteLine("SIMILARITY " + predictedVal.Similarity + " PREDICTED VALUE :" + predictedVal.PredictedInput);
-                    }
                     trainedEngine.Reset();
+                    var predictedValuesForUserInput = trainedEngine.Predict(sdr);
+                    if (predictedValuesForUserInput.Count > 0)
+                    {
+                        foreach (var predictedVal in predictedValuesForUserInput)
+                        {
+                            Console.WriteLine("SIMILARITY " + predictedVal.Similarity + " PREDICTED VALUE :" + predictedVal.PredictedInput);
+                        }
+                    }
+                    else
+                        Console.WriteLine("Nothing predicted :(");
                 }
                 Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
                 userInput = Console.ReadLine();
@@ -105,24 +125,33 @@ namespace LabelPrediction
         //public Dictionary<CortexLayer<object,object>, HtmClassifier<string, ComputeCycle>> Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string,int[]>> sequences)
         public HtmPredictionEngine Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string,int[]>> sequences)
         {
+            /* HTM Config */
             var htmConfig = HelperMethods.FetchHTMConfig(inputBits, numColumns);
 
+            /* Creating Connections */
             var mem = new Connections(htmConfig);
 
+            /* Getting HTM CLassifier */
             HtmClassifier<string, ComputeCycle> cls = new HtmClassifier<string, ComputeCycle>();
 
+            /* Get Cortex Layer */
             CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
+            /* HPA Stable Flag */
             bool isInStableState = false;
 
+            /* Learn Flag */
             bool learn = true;
 
+            /* Number of new born cycles */
             int newbornCycle = 0;
 
+            /* Logs */
             var OUTPUT_LOG_LIST = new List<Dictionary<int, string>>();
             var OUTPUT_LOG = new Dictionary<int, string>();
             var OUTPUT_trainingAccuracy_graph = new List<Dictionary<int, double>>();
 
+            /* Minimum Cycles */
             int numUniqueInputs = sequences.Count;
 
             // For more information see following paper: https://www.scitepress.org/Papers/2021/103142/103142.pdf
@@ -138,20 +167,24 @@ namespace LabelPrediction
                 // We are not learning in instable state.
                 learn = isInStableState = isStable;
 
-                // Clear active and predictive cells.
-                //tm.Reset(mem);
             }, numOfCyclesToWaitOnChange: 50);
 
+
+            /* Spatial Pooler with HomeoPlasticityController using Connections */
             SpatialPoolerMT sp = new SpatialPoolerMT();
             sp.Init(mem);
 
+            /* Temporal Memory with Connections */
             TemporalMemory tm = new TemporalMemory();
             tm.Init(mem);
 
-            //layer1.HtmModules.Add("encoder", encoder);
+            /* Adding Encoder to Cortex Layer */
+            //layer1.HtmModules.Add("encoder", encoder); /* not needed since encoded already */
+
+            /* Adding Spatial Pooler to Cortex Layer */
             layer1.HtmModules.Add("sp", sp);
 
-            // CONTRAINER FOR Previous Active Columns
+            // Container for Previous Active Columns
             int[] prevActiveCols = new int[0];
 
             int computeCycle = 0;
@@ -160,24 +193,28 @@ namespace LabelPrediction
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
-            //
-            // Training SP to get stable. New-born stage.
-            //
+            /*
+             * Training SP to get stable. New-born stage.
+             */
 
+            /* Stable Condition Loop --- Loop 1 */
             for (int i = 0; i < maxComputeCycles && isInStableState == false; i++)
             {
                 computeCycle++;
                 newbornCycle++;
                 Debug.WriteLine($"-------------- Newborn Cycle {newbornCycle} ---------------");
+                Console.WriteLine($"-------------- Newborn Cycle {newbornCycle} ---------------");
 
+                /* For each sequence in multi-sequence --- Loop 2 */
                 foreach (var sequence in sequences)
                 {
+                    /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var element in sequence)
                     {
                         var observationClass = element.Key; // OBSERVATION LABEL || SEQUENCE LABEL
-                        var elementSDR = element.Value; // ALL ELEMENT IN ONE SEQUENCE
+                        var elementSDR = element.Value; // ELEMENT IN ONE SEQUENCE
 
-                        Console.WriteLine($"-------------- {observationClass} ---------------");
+                        Debug.WriteLine($"-------------- {observationClass} ---------------");
 
                         var lyrOut = layer1.Compute(elementSDR, true);     /* CORTEX LAYER OUTPUT with elementSDR as INPUT and LEARN = TRUE */
                         //var lyrOut = layer1.Compute(elementSDR, learn);    /* CORTEX LAYER OUTPUT with elementSDR as INPUT and LEARN = if TRUE */
@@ -192,7 +229,7 @@ namespace LabelPrediction
             }
 
             // Clear all learned patterns in the classifier.
-            cls.ClearState();
+            //cls.ClearState();
 
             // We activate here the Temporal Memory algorithm.
             layer1.HtmModules.Add("tm", tm);
@@ -204,6 +241,8 @@ namespace LabelPrediction
 
             List<List<string>> possibleSequence = new List<List<string>>();
 
+            /* Training SP+TM together */
+            /* For each sequence in multi-sequence --- Loop 1 */
             foreach (var sequence in sequences)
             {
                 int SequencesMatchCount = 0; // NUMBER OF MATCHES
@@ -211,23 +250,29 @@ namespace LabelPrediction
                 var tempLOGGRAPH = new Dictionary<int, double>();
                 double SaturatedAccuracyCount = 0;
 
+                /* Loop until maxCycles --- Loop 2*/
                 for (int i = 0; i < maxCycles; i++)
                 {
                     List<string> ElementWiseClasses = new List<string>();
 
+                    /* Element in sequenc match counter */
                     int elementMatches = 0;
 
+                    /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var Elements in sequence)
                     {
                         var observationLabel = Elements.Key;
                  
                         var lyrOut = new ComputeCycle();
 
+                        /* Get Compute Cycle */
                         lyrOut = layer1.Compute(Elements.Value, learn) as ComputeCycle;
                         Debug.WriteLine(string.Join(',', lyrOut.ActivColumnIndicies));
 
+                        /* Get Active Cells */
                         List<Cell>  actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
 
+                        /* Learn the combination of Label and Active Cells */
                         cls.Learn(observationLabel, actCells.ToArray());
 
                         if (lastPredictedValue == observationLabel && lastPredictedValue != "")
@@ -345,10 +390,6 @@ namespace LabelPrediction
 
             Debug.WriteLine("-------------------TRAINING LOGS HAS BEEN CREATED---------------------");
             Console.WriteLine("-------------------TRAINING LOGS HAS BEEN CREATED------------------------");
-
-            var returnDictionary = new Dictionary<CortexLayer<object, object>, HtmClassifier<string, ComputeCycle>>();
-            returnDictionary.Add(layer1, cls);
-            //return returnDictionary;
 
             return new HtmPredictionEngine { Layer = layer1, Classifier = cls, Connections = mem };
         }
