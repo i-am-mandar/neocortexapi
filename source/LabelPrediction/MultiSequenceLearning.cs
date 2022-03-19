@@ -27,7 +27,7 @@ namespace LabelPrediction
         public void StartExperiment()
         {
             int inputBits = 100;
-            int maxCycles = 15;
+            int maxCycles = 30;
             int numColumns = 2048;
             string[] sequenceFormatType = { "byMonth" /* 720 */, "byWeek" /* 168 */, "byDay" /* 24 */};
 
@@ -203,7 +203,6 @@ namespace LabelPrediction
                 computeCycle++;
                 newbornCycle++;
                 Debug.WriteLine($"-------------- Newborn Cycle {newbornCycle} ---------------");
-                Console.WriteLine($"-------------- Newborn Cycle {newbornCycle} ---------------");
 
                 /* For each sequence in multi-sequence --- Loop 2 */
                 foreach (var sequence in sequences)
@@ -370,8 +369,8 @@ namespace LabelPrediction
             DateTime now = DateTime.Now;
             string filename = now.ToString("g"); //
 
-            filename = "PowerConsumptionPredictionExperiment" + filename.Split(" ")[0] + "_" + now.Ticks.ToString() + ".txt";
-            string path = System.AppDomain.CurrentDomain.BaseDirectory + "\\TrainingLogs\\" + filename;
+            filename = $"PowerConsumptionPredictionExperiment_{filename.Split(" ")[0]}_{now.Ticks.ToString()}.txt";
+            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName, $"TrainingLogs/{filename}");
 
             using (StreamWriter swOutput = File.CreateText(path))
             {
