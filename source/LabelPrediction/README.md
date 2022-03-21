@@ -46,8 +46,11 @@ For learning time-series and predicting it we are using Multi-sequence Learning 
 The HTM Classifier consists of Spatial Pooler and Temporal Memory which takes in encoded data to learn the sequence.
 
 I. Create Multiple Sequences of the time-series
+
 II. Encode the datetime as segment
+
 III. Learn using HTM Classifier
+
 IV. Predict the label 
 
 3.Encoding and Learning
@@ -244,9 +247,14 @@ Yet to be done.
 6.References
 -------------
 a. [NeoCortexApi](https://github.com/ddobric/neocortexapi)
+
 b. [Hierarchical Temporal Memory (HTM) Whitepaper](https://numenta.com/neuroscience-research/research-publications/papers/hierarchical-temporal-memory-white-paper/)
+
 c. [Encoding Data for HTM Systems](https://arxiv.org/abs/1602.05925)
+
 d. [Properties of Sparse Distributed Representations and their Application to Hierarchical Temporal Memory](https://arxiv.org/abs/1503.07469)
+
 e. [A thousand brains: toward biologically constrained AI](https://link.springer.com/article/10.1007/s42452-021-04715-0)
+
 f. [The HTM Spatial Pooler—A Neocortical Algorithm for Online Sparse Distributed Coding](https://numenta.com/neuroscience-research/research-publications/papers/htm-spatial-pooler-neocortical-algorithm-for-online-sparse-distributed-coding/)
 
