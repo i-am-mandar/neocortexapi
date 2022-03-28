@@ -1,7 +1,7 @@
-Project Name: Investigate Label Prediction from the time-series sequence
-------------------------------------------------------------------------------
+# Project Name: Investigate Label Prediction from the time-series sequence
+
 Description:
--------------
+=============
 
 1.Objective
 -------------

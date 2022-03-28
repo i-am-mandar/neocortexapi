@@ -27,7 +27,7 @@ namespace LabelPrediction
         public void StartExperiment()
         {
             int inputBits = 100;
-            int maxCycles = 30;
+            int maxCycles = 15;
             int numColumns = 2048;
             string[] sequenceFormatType = { "byMonth" /* 720 */, "byWeek" /* 168 */, "byDay" /* 24 */};
 
@@ -210,7 +210,8 @@ namespace LabelPrediction
                     /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var element in sequence)
                     {
-                        var observationClass = element.Key; // OBSERVATION LABEL || SEQUENCE LABEL
+                        string[] splitKeyv = element.Key.Split(",");
+                        var observationClass = splitKeyv[0]; // OBSERVATION LABEL || SEQUENCE LABEL
                         var elementSDR = element.Value; // ELEMENT IN ONE SEQUENCE
 
                         Debug.WriteLine($"-------------- {observationClass} ---------------");
@@ -260,7 +261,8 @@ namespace LabelPrediction
                     /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var Elements in sequence)
                     {
-                        var observationLabel = Elements.Key;
+                        string[] splitKey = Elements.Key.Split(",");
+                        var observationLabel = splitKey[0];
                  
                         var lyrOut = new ComputeCycle();
 
@@ -359,9 +361,12 @@ namespace LabelPrediction
 
             sw.Stop();
 
+            TimeSpan timeSpan = sw.Elapsed;
+
             //****************DISPLAY STATUS OF EXPERIMENT
             Debug.WriteLine("-------------------TRAINING END------------------------");
             Console.WriteLine("-----------------TRAINING END------------------------");
+            Console.WriteLine($"Training Time : {timeSpan.Minutes} minutes and {timeSpan.Seconds} seconds");
             Debug.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS---------------------");
             Console.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS------------------------");
             //*****************
