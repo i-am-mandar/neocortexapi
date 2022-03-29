@@ -1,0 +1,29 @@
+PowerConsumptionPredictionExperiment18-03-2022_637832112077615792.txt
+******Sequence Starting*****
+cycle : 0 	 Accuracy :0 	 
+cycle : 1 	 Accuracy :0 	 
+cycle : 2 	 Accuracy :33.33333333333333 	 
+cycle : 3 	 Accuracy :4.166666666666666 	 
+cycle : 4 	 Accuracy :29.166666666666668 	 
+****Sequence Ending*****
+******Sequence Starting*****
+cycle : 0 	 Accuracy :0 	 
+cycle : 1 	 Accuracy :0 	 
+cycle : 2 	 Accuracy :4.166666666666666 	 
+cycle : 3 	 Accuracy :20.833333333333336 	 
+cycle : 4 	 Accuracy :16.666666666666664 	 
+****Sequence Ending*****
+******Sequence Starting*****
+cycle : 0 	 Accuracy :0 	 
+cycle : 1 	 Accuracy :0 	 
+cycle : 2 	 Accuracy :4.166666666666666 	 
+Cycle: 3 	 Saturated Accuracy : 4.166666666666666 	 Number of times repeated 1
+cycle : 4 	 Accuracy :8.333333333333332 	 
+****Sequence Ending*****
+******Sequence Starting*****
+cycle : 0 	 Accuracy :0 	 
+cycle : 1 	 Accuracy :8.333333333333332 	 
+cycle : 2 	 Accuracy :4.166666666666666 	 
+cycle : 3 	 Accuracy :0 	 
+cycle : 4 	 Accuracy :25 	 
+****Sequence Ending*****

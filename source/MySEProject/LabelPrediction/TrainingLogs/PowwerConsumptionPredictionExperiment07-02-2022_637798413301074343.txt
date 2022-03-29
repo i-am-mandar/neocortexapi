@@ -1,0 +1,18 @@
+PowwerConsumptionPredictionExperiment07-02-2022_637798413301074343.txt
+******Sequence Starting*****
+cycle : 0 	 Accuracy :0 	 
+cycle : 1 	 Accuracy :0 	 
+cycle : 2 	 Accuracy :8.333333333333332 	 
+cycle : 3 	 Accuracy :0 	 
+cycle : 4 	 Accuracy :6.25 	 
+cycle : 5 	 Accuracy :4.166666666666666 	 
+cycle : 6 	 Accuracy :8.333333333333332 	 
+cycle : 7 	 Accuracy :10.416666666666668 	 
+cycle : 8 	 Accuracy :16.666666666666664 	 
+cycle : 9 	 Accuracy :14.583333333333334 	 
+Cycle: 10 	 Saturated Accuracy : 14.583333333333334 	 Number of times repeated 1
+cycle : 11 	 Accuracy :18.75 	 
+cycle : 12 	 Accuracy :6.25 	 
+cycle : 13 	 Accuracy :14.583333333333334 	 
+Cycle: 14 	 Saturated Accuracy : 14.583333333333334 	 Number of times repeated 1
+****Sequence Ending*****

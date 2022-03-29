@@ -14,7 +14,9 @@ namespace LabelPrediction
     public class HelperMethods
     {
         public HelperMethods()
-        { }
+        {
+            //needs no implementation
+        }
 
         /// <summary>
         /// Reads PowerConsumption CSV file and pre-processes the data and returns it into List of Dictionary
@@ -38,6 +40,7 @@ namespace LabelPrediction
             {
                 using(StreamReader reader = new StreamReader(csvFilePath))
                 {
+                    // [Power, "dd/MM hh SEG"]
                     Dictionary<string, string> sequence = new Dictionary<string, string>();
                     while (reader.Peek() >= 0)
                     {
@@ -51,8 +54,8 @@ namespace LabelPrediction
                         var columnPower    = values[1];
 
                         /* 
-                         * This is a bit mess. The DateTime in date set is M/d/yy h:mm or MM/dd/yy hh:mm parsing with ParseExact seemed difficult, 
-                         * reformatting to dd/MM/yy hh:mm 
+                         * This is a bit mess. The DateTime in date set is M/d/yy h:mm or MM/dd/yy hh:mm 
+                         * parsing with ParseExact seemed difficult, reformatting to dd/MM/yy hh:mm 
                          */
                         string[] splitDateTime = columnDateTime.Split(" ");
 
@@ -80,8 +83,15 @@ namespace LabelPrediction
                         int hh = int.Parse(time[0]);
                         int mm = int.Parse(time[1]);
 
-                        string dateTime = dd.ToString("00") + "/" + MM.ToString("00") + "/" + yy.ToString("00") + " " + hh.ToString("00") + ":" + mm.ToString("00");
-
+                        /*
+                         * Recreating date as dd/MM/yy hh:mm
+                         */
+                        string dateTime = $"{dd.ToString("00")}/{MM.ToString("00")}/{yy.ToString("00")} {hh.ToString("00")}:{mm.ToString("00")}";
+                        
+                        /*
+                         * If the label(key) is same then add a unique number 
+                         * to key before adding to sequence to create multiple sequences
+                         */
                         if (sequence.ContainsKey(columnPower))
                         {
                             var newKey = columnPower + "," + keyForUniqueIndexes;
@@ -112,6 +122,12 @@ namespace LabelPrediction
             return null;
         }
 
+        /// <summary>
+        /// HTM Config for creating Connections
+        /// </summary>
+        /// <param name="inputBits"></param>
+        /// <param name="numColumns"></param>
+        /// <returns></returns>
         public static HtmConfig FetchHTMConfig(int inputBits, int numColumns)
         {
             HtmConfig cfg = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
@@ -140,31 +156,36 @@ namespace LabelPrediction
                 // Used by punishing of segments.
                 PredictedSegmentDecrement = 0.1,
 
-                NumInputs = 88  //is not able to over´ride
+                //NumInputs = 88
             };
 
             return cfg;
         }
-
+        
+        /// <summary>
+        /// Takes in user input and return encoded SDR for prediction
+        /// </summary>
+        /// <param name="userInput"></param>
+        /// <returns></returns>
         public static int[] EncodeSingleInput(string userInput)
         {
             DateTime date = DateTime.Parse(userInput);
             var day = date.Day;
             var month = date.Month;
-            var year = date.Year;
-            var hour = date.Hour;
+            var week = date.DayOfWeek;
+            var segment = date.Hour;
 
             EncoderBase dayEncoder   = FetchDayEncoder();
             EncoderBase monthEncoder = FetchMonthEncoder();
-            EncoderBase yearEncoder  = FetchYearEncoder();
-            EncoderBase hourEncoder  = FetchHourEncoder();
+            EncoderBase weekEncoder  = FetchWeekEncoder();
+            EncoderBase segmentEncoder  = FetchSegmentEncoder();
 
             int[] sdr = new int[0];
 
             sdr = sdr.Concat(dayEncoder.Encode(day)).ToArray();
             sdr = sdr.Concat(monthEncoder.Encode(month)).ToArray();
-            sdr = sdr.Concat(yearEncoder.Encode(year)).ToArray();
-            sdr = sdr.Concat(hourEncoder.Encode(hour)).ToArray();
+            sdr = sdr.Concat(segmentEncoder.Encode(segment)).ToArray();
+            sdr = sdr.Concat(weekEncoder.Encode(week)).ToArray();
 
             return sdr;
         }
@@ -175,14 +196,14 @@ namespace LabelPrediction
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        public static List<Dictionary<string, int[]>> EncodePowerConsumptionData(List<Dictionary<string,string>> data)
+        public static List<Dictionary<string, int[]>> EncodePowerConsumptionData(List<Dictionary<string,string>> data, bool trace = false)
         {
             List<Dictionary<string,int[]>> listOfSDR = new List<Dictionary<string,int[]>>();
 
-            ScalarEncoder hourEncoder = FetchHourEncoder();
+            ScalarEncoder segmentEncoder = FetchSegmentEncoder();
             ScalarEncoder dayEncoder = FetchDayEncoder();
             ScalarEncoder monthEncoder = FetchMonthEncoder();
-            ScalarEncoder yearEncoder = FetchYearEncoder();
+            ScalarEncoder weekEncoder = FetchWeekEncoder();
 
             foreach (var sequence in data)
             {
@@ -196,20 +217,23 @@ namespace LabelPrediction
                     string[] formats = { "MM/dd/yy hh:mm" };
                     //DateTime dateTime = DateTime.ParseExact(value, formats, CultureInfo.InvariantCulture);
                     DateTime dateTime = DateTime.Parse(value);
-                    int day = dateTime.Day;
-                    int month = dateTime.Month;
-                    int year = dateTime.Year;
-                    int hour = dateTime.Hour;
+                    var day = dateTime.Day;
+                    var month = dateTime.Month;
+                    var week = dateTime.DayOfWeek;
+                    var hour = dateTime.Hour;
 
                     int[] sdr = new int[0];
 
                     sdr = sdr.Concat(dayEncoder.Encode(day)).ToArray();
                     sdr = sdr.Concat(monthEncoder.Encode(month)).ToArray();
-                    sdr = sdr.Concat(yearEncoder.Encode(year)).ToArray();
-                    sdr = sdr.Concat(hourEncoder.Encode(hour)).ToArray();
+                    sdr = sdr.Concat(segmentEncoder.Encode(hour)).ToArray();
+                    sdr = sdr.Concat(weekEncoder.Encode(week)).ToArray();
+
+                    //logger.WriteInformation(Helpers.StringifyVector(sdr));
 
                     tempDic.Add(label, sdr);
                 }
+                
                 listOfSDR.Add(tempDic);
             }
 
@@ -217,13 +241,17 @@ namespace LabelPrediction
             return listOfSDR;
         }
 
+        /// <summary>
+        /// ScalarEncoder which returns config for Day of Month
+        /// </summary>
+        /// <returns></returns>
         public static ScalarEncoder FetchDayEncoder()
         {
             ScalarEncoder dayEncoder = new ScalarEncoder(new Dictionary<string, object>()
             {
-                { "W", 9},
-                { "N", 40},
-                { "MinVal", (double)1}, // Min value = (1).
+                { "W", 7},
+                { "N", 38},
+                { "MinVal", (double)1},  // Min value = (1).
                 { "MaxVal", (double)32}, // Max value = (31).
                 { "Periodic", true},
                 { "Name", "Date"},
@@ -233,13 +261,17 @@ namespace LabelPrediction
             return dayEncoder;
         }
 
+        /// <summary>
+        /// MonthEncoder which returns config for Month of Year
+        /// </summary>
+        /// <returns></returns>
         public static ScalarEncoder FetchMonthEncoder()
         {
             ScalarEncoder monthEncoder = new ScalarEncoder(new Dictionary<string, object>()
             {
                 { "W", 5},
                 { "N", 17},
-                { "MinVal", (double)1}, // Min value = (1).
+                { "MinVal", (double)1},  // Min value = (1).
                 { "MaxVal", (double)13}, // Max value = (12).
                 { "Periodic", true}, 
                 { "Name", "Month"},
@@ -248,21 +280,29 @@ namespace LabelPrediction
             return monthEncoder;
         }
 
-        public static ScalarEncoder FetchHourEncoder()
+        /// <summary>
+        /// SegmentEncoder which returns config for Segment of Day
+        /// </summary>
+        /// <returns></returns>
+        public static ScalarEncoder FetchSegmentEncoder()
         {
-            ScalarEncoder hourEncoder = new ScalarEncoder(new Dictionary<string, object>()
+            ScalarEncoder segmentEncoder = new ScalarEncoder(new Dictionary<string, object>()
             {
                 { "W", 9},
                 { "N", 34},
-                { "MinVal", (double)0},
-                { "MaxVal", (double)23 + 1},
+                { "MinVal", (double)0},      // Min value = (0)
+                { "MaxVal", (double)23 + 1}, //Max value = (23)
                 { "Periodic", true},
                 { "Name", "Hour of the day."},
                 { "ClipInput", true},
             });
-            return hourEncoder;
+            return segmentEncoder;
         }
 
+        /// <summary>
+        /// YearEncoder which returns config for Year
+        /// </summary>
+        /// <returns></returns>
         public static ScalarEncoder FetchYearEncoder()
         {
             ScalarEncoder yearEncoder = new ScalarEncoder(new Dictionary<string, object>()
@@ -278,18 +318,41 @@ namespace LabelPrediction
             return yearEncoder;
         }
 
+        /// <summary>
+        /// WeekEncoder which return config for Day of the Week
+        /// </summary>
+        /// <returns></returns>
+        public static ScalarEncoder FetchWeekEncoder()
+        {
+            ScalarEncoder weekEncoder = new ScalarEncoder(new Dictionary<string, object>()
+            {
+                { "W", 3},
+                { "N", 11},
+                { "MinVal", (double)0}, // Min value = 0.
+                { "MaxVal", (double)7}, // Max value = 6.
+                { "Periodic", false},
+                { "Name", "Year"},
+                { "ClipInput", true},
+            });
+            return weekEncoder;
+        }
+
+        /// <summary>
+        /// MultiEncoder for encoding DateTime
+        /// </summary>
+        /// <returns></returns>
         public static MultiEncoder FetchDateTimeEncoder()
         {
-            EncoderBase hourEncoder = FetchHourEncoder();
+            EncoderBase segmentEncoder = FetchSegmentEncoder();
             EncoderBase dayEncoder = FetchDayEncoder();
             EncoderBase monthEncoder = FetchMonthEncoder();
-            EncoderBase yearEncoder = FetchYearEncoder();
+            EncoderBase weekEncoder = FetchWeekEncoder();
 
             List<EncoderBase> datetime = new List<EncoderBase>();
-            datetime.Add(hourEncoder);
+            datetime.Add(segmentEncoder);
             datetime.Add(dayEncoder);
             datetime.Add(monthEncoder);
-            datetime.Add(yearEncoder);
+            datetime.Add(weekEncoder);
 
             MultiEncoder datetimeEncoder = new MultiEncoder(datetime);
 
