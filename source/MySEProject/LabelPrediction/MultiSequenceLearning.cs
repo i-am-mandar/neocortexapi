@@ -80,8 +80,15 @@ namespace LabelPrediction
             Console.WriteLine("Done Learning");
         }
 
-            Debug.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd-mm-yyyy hh:00");
-            Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd-mm-yyyy hh:00");
+        /// <summary>
+        /// Takes user input and gives predicted label
+        /// </summary>
+        /// <param name="trainedEngine"></param>
+        private static void RunPrediction(HtmPredictionEngine trainedEngine)
+        {
+            Debug.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
+            Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
+
             var userInput = Console.ReadLine();
 
             while (!userInput.Equals("q") && userInput != "Q")
@@ -89,14 +96,19 @@ namespace LabelPrediction
                 if (userInput != null)
                 {
                     var sdr = HelperMethods.EncodeSingleInput(userInput);
-                    var userLayerOutput = trainedCortexLayer.Compute(sdr, false) as ComputeCycle;
-                    var predictedValuesForUserInput = trainedClassifier.GetPredictedInputValues(userLayerOutput.PredictiveCells.ToArray(), 5);
-                    foreach (var predictedVal in predictedValuesForUserInput)
+                    trainedEngine.Reset();
+                    var predictedValuesForUserInput = trainedEngine.Predict(sdr);
+                    if (predictedValuesForUserInput.Count > 0)
                     {
-                        Console.WriteLine("SIMILARITY " + predictedVal.Similarity + " PREDICTED VALUE :" + predictedVal.PredictedInput);
+                        foreach (var predictedVal in predictedValuesForUserInput)
+                        {
+                            Console.WriteLine("SIMILARITY " + predictedVal.Similarity + " PREDICTED VALUE :" + predictedVal.PredictedInput);
+                        }
                     }
+                    else
+                        Console.WriteLine("Nothing predicted :(");
                 }
-                Console.WriteLine("TAKING USERINPUT FOR CHECKING PREDICTED POWER CONSUMPTION");
+                Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
                 userInput = Console.ReadLine();
             }
         }
@@ -111,7 +123,7 @@ namespace LabelPrediction
         /// <param name="sequences">Multi Sequence for training</param>
         /// <returns>Learned CortexLayer and HtmClassifier for prediction</returns>
         //public Dictionary<CortexLayer<object,object>, HtmClassifier<string, ComputeCycle>> Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string,int[]>> sequences)
-        public HtmPredictionEngine Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string,int[]>> sequences)
+        public HtmPredictionEngine Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string, int[]>> sequences)
         {
             /* HTM Config */
             var htmConfig = HelperMethods.FetchHTMConfig(inputBits, numColumns);
@@ -251,7 +263,7 @@ namespace LabelPrediction
                     {
                         string[] splitKey = Elements.Key.Split(",");
                         var observationLabel = splitKey[0];
-                 
+
                         var lyrOut = new ComputeCycle();
 
                         /* Get Compute Cycle */
@@ -259,7 +271,7 @@ namespace LabelPrediction
                         Debug.WriteLine(string.Join(',', lyrOut.ActivColumnIndicies));
 
                         /* Get Active Cells */
-                        List<Cell>  actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
+                        List<Cell> actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
 
                         /* Learn the combination of Label and Active Cells */
                         cls.Learn(observationLabel, actCells.ToArray());
@@ -409,7 +421,7 @@ namespace LabelPrediction
             public HtmClassifier<string, ComputeCycle> Classifier { get; set; }
         }
 
-        
+
     }
 
 }
