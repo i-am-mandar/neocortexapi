@@ -236,13 +236,20 @@ public List<ClassifierResult<string>> Predict(int[] input)
 4.Results
 -------------
 
-Yet to be published.
+In this experiment, total 40 times the project was ran to get and check on the results. On the X-axis the number of runs is mentioned. On the Y-axis there is maximum percentage of accuracy.  The results are shown in below figure 1.
+
+![Figure 1](https://github.com/i-am-mandar/neocortexapi/blob/master/source/MySEProject/Documentation/experiment.png)
 
 
 5.Discussion
 -------------
 
-Yet to be done.
+Learning and predicting time-series have been experimented for decades and various methods have been used. Adapting an existing method for large and noisy data remains a challenge. In the experiment, HTM Classifier is used which is a recently developed neural network based on cortex of human brain and not just a single neuron model. 
+
+But there were some hardware limitations running on local machine. To solve this in better way the road of using cloud can be taken to scale up the learning process.
+
+Low accuracy is seen due to small size of dataset has been consider in the experiment. As seen while the run 744 segment took around 35 to 38 minutes to be trained. Also, long runtime was seen when more cycles where used.
+
 
 6.References
 -------------
