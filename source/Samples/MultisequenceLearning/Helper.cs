@@ -124,6 +124,70 @@ namespace MultisequenceLearning
             return null;
         }
 
+        public static List<Dictionary<string,string>> CreatePowerConsumptionDataset(string sequenceFormat, DateTime startDate, DateTime endDate)
+        {
+            int keyForUniqueIndexes = 0;
+            string[] sequenceFormatType = { "byMonth", "byWeek", "byDay" };
+            int[] daysOfMonth = { -1, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+            double totalCount = 0;
+            double actualCount = 0;
+            int count = 0;
+            int maxCount = 0;
+            bool firstTime = true;
+            double power = 0;
+            List<Dictionary<string, string>> sequencesCollection = new List<Dictionary<string, string>>();
+            var random = new ThreadSafeRandom();
+            TimeSpan ts = endDate - startDate;
+            totalCount = ts.TotalHours;
+            Dictionary<string, string> sequence = new Dictionary<string, string>();
+
+
+            while (true)
+            {
+                if (firstTime)
+                {
+                    if (sequenceFormatType[0].Equals(sequenceFormat))        /* byMonth */
+                        maxCount = daysOfMonth[startDate.Month] * 24;
+                    else if (sequenceFormatType[1].Equals(sequenceFormat))   /* byWeek  */
+                        maxCount = 7 * 24;
+                    else if (sequenceFormatType[2].Equals(sequenceFormat))   /* byDay   */
+                        maxCount = 24;
+
+                    firstTime = false;
+                }
+
+                string dateTime = $"{startDate.Day.ToString("00")}/{startDate.Month.ToString("00")}/{startDate.Year.ToString("00")} {startDate.Hour.ToString("00")}:{startDate.Minute.ToString("00")}";
+                power = random.Next(500,5000)/1000;
+
+                if (sequence.ContainsKey(power.ToString()))
+                    continue;
+                else
+                    sequence.Add(power.ToString(), dateTime);
+
+                startDate = startDate.AddHours(1);
+                count++;
+                actualCount++;
+                /*
+                 * Creating multiple sequences for each month
+                 */
+                if (count >= maxCount)
+                {
+                    count = 0;
+                    maxCount = 0;
+                    firstTime = true;
+
+                    sequencesCollection.Add(sequence);
+
+                    sequence = new Dictionary<string, string>();
+                }
+
+                if (actualCount >= totalCount)
+                    break;
+            }
+
+            return sequencesCollection;
+        }
+
         /// <summary>
         /// HTM Config for creating Connections
         /// </summary>
