@@ -53,7 +53,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{9475B9AE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GridCell", "GridCell\GridCell.csproj", "{E102D57D-BA8F-4E21-8365-8ABAFB5D2C94}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MultisequenceLearning", "Samples\MultisequenceLearning\MultisequenceLearning.csproj", "{B5ECA922-8001-4398-919F-E1065324C1B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SongPredection", "Samples\MultisequenceLearning\SongPredection.csproj", "{B5ECA922-8001-4398-919F-E1065324C1B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

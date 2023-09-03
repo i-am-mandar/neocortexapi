@@ -1,0 +1,82 @@
+[
+  {
+    "Name": "Uptown Funk",
+    "Singer1": "Mark Ronson",
+    "Singer2": "Bruno Mars",
+    "Genre1": "Funk",
+    "Genre2": "Pop",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Can't Stop the Feeling!",
+    "Singer1": "Justin Timberlake",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Wake Me Up",
+    "Singer1": "Avicii",
+    "Singer2": "Aloe Blacc",
+    "Genre1": "Electronic",
+    "Genre2": "Dance",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Shut Up and Dance",
+    "Singer1": "Walk the Moon",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "Rock",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Eye of the Tiger",
+    "Singer1": "Survivor",
+    "Singer2": "",
+    "Genre1": "Rock",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Happy",
+    "Singer1": "Pharrell Williams",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Dance Monkey",
+    "Singer1": "Tones and I",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "We Will Rock You",
+    "Singer1": "Queen",
+    "Singer2": "",
+    "Genre1": "Rock",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Shake It Off",
+    "Singer1": "Taylor Swift",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Crazy in Love",
+    "Singer1": "Beyoncé",
+    "Singer2": "Jay-Z",
+    "Genre1": "R&B",
+    "Genre2": "Pop",
+    "Mood": "Energetic"
+  }
+]

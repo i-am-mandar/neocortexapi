@@ -1,0 +1,82 @@
+[
+  {
+    "Name": "Shape of You",
+    "Singer1": "Ed Sheeran",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Uptown Funk",
+    "Singer1": "Mark Ronson",
+    "Singer2": "Bruno Mars",
+    "Genre1": "Funk",
+    "Genre2": "Pop",
+    "Mood": "Groovy"
+  },
+  {
+    "Name": "Bohemian Rhapsody",
+    "Singer1": "Queen",
+    "Singer2": "",
+    "Genre1": "Rock",
+    "Genre2": "",
+    "Mood": "Epic"
+  },
+  {
+    "Name": "Rolling in the Deep",
+    "Singer1": "Adele",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Powerful"
+  },
+  {
+    "Name": "Hotel California",
+    "Singer1": "Eagles",
+    "Singer2": "",
+    "Genre1": "Rock",
+    "Genre2": "",
+    "Mood": "Mysterious"
+  },
+  {
+    "Name": "Someone Like You",
+    "Singer1": "Adele",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Emotional"
+  },
+  {
+    "Name": "Wake Me Up",
+    "Singer1": "Avicii",
+    "Singer2": "Aloe Blacc",
+    "Genre1": "Electronic",
+    "Genre2": "Dance",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Lean On",
+    "Singer1": "Major Lazer",
+    "Singer2": "DJ Snake",
+    "Genre1": "Electronic",
+    "Genre2": "Dance",
+    "Mood": "Upbeat"
+  },
+  {
+    "Name": "Blinding Lights",
+    "Singer1": "The Weeknd",
+    "Singer2": "",
+    "Genre1": "R&B",
+    "Genre2": "",
+    "Mood": "Energetic"
+  },
+  {
+    "Name": "Circles",
+    "Singer1": "Post Malone",
+    "Singer2": "",
+    "Genre1": "R&B",
+    "Genre2": "",
+    "Mood": "Reflective"
+  }
+]

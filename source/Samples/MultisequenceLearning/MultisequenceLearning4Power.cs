@@ -10,54 +10,55 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-using SongPredection;
-using SongPredection.Model;
 
-namespace SongPredection
+namespace MultisequenceLearning
 {
-    public class MultiSequenceLearning
+    public class MultisequenceLearning4Power
     {
+        static readonly string PowerConsumptionCSV = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\Dataset\rec-center-hourly-og.csv");
+        static readonly string PowerConsumptionCSV_Exp = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory + @"\Dataset\rec-center-hourly-exp.csv");
 
-        public List<double> Accuracy { get; set; }
-        public List<Dictionary<string, string>>? UserPredictedValues { get; set; }
-        public long ElapsedTime { get; set; }
-        public string OutputPath { get; set; }
-        public string RandomUserInput { get; set; }
 
-        public MultiSequenceLearning()
+        public MultisequenceLearning4Power()
         {
-            Accuracy = new List<double>();
-            UserPredictedValues = new List<Dictionary<string, string>>();
-            OutputPath = "";
-            RandomUserInput = "";
+            //needs no implementation
+        }
+
+        public void StartExperiment()
+        {
+            int inputBits = 100;
+            int maxCycles = 15;
+            int numColumns = 2048;
+            string[] sequenceFormatType = { "byMonth" /* 720 */, "byWeek" /* 168 */, "byDay" /* 24 */};
+
+            List<Dictionary<string, int[]>> encodedData;
+            EncoderBase encoderDateTime;
+            HtmPredictionEngine trainedEngine;
+
+            PrepareTrainingData(sequenceFormatType, out encodedData, out encoderDateTime);
+
+            RunTraining(inputBits, maxCycles, numColumns, encodedData, encoderDateTime, out trainedEngine);
+
+            RunPrediction(trainedEngine);
         }
 
         /// <summary>
-        /// Starts the MultiSequenceLearning Experiment
+        /// Preparing Data for Learning - 1. Created MultiSequence and 2. Encoding Input
         /// </summary>
-        /// <param name="dataset">local full path for input dataset</param>
-        public HtmPredictionEngine StartExperiment(List<Dictionary<string, int[]>> sequences, Database db, int inputBits)
+        /// <param name="sequenceFormatType"></param>
+        /// <param name="encodedData"></param>
+        /// <param name="encoderDateTime"></param>
+        private static void PrepareTrainingData(string[] sequenceFormatType, out List<Dictionary<string, int[]>> encodedData, out EncoderBase encoderDateTime)
         {
-            int maxCycles = 100;
-            int numColumns = 2048;
+            Console.WriteLine("Reading CSV File..");
+            //var csvData = HelperMethods.ReadPowerConsumptionDataFromCSV(PowerConsumptionCSV, sequenceFormatType[0]);
+            var csvData = Helper4Power.ReadPowerConsumptionDataFromCSV(PowerConsumptionCSV_Exp, sequenceFormatType[2]);
+            Console.WriteLine("Completed reading CSV File..");
 
-            MultiEncoder encoder = HelperMethods.GetSongEncoder(db);
-
-            Stopwatch sw = new Stopwatch();
-
-            sw.Start();
-
-            HtmPredictionEngine trainedEngine = RunTraining(inputBits, maxCycles, numColumns, sequences, encoder);
-
-            //RunPrediction(trainedEngine);
-            sw.Stop();
-
-            ElapsedTime = (sw.ElapsedMilliseconds) / 1000; //milliseconds to seconds
-
-            return trainedEngine;
+            Console.WriteLine("Encoding data read from CSV...");
+            encodedData = Helper4Power.EncodePowerConsumptionData(csvData, true);
+            encoderDateTime = Helper4Power.FetchDateTimeEncoder();
         }
-
-
 
         /// <summary>
         /// Getting trained model by MultiSequence Learning
@@ -66,59 +67,50 @@ namespace SongPredection
         /// <param name="maxCycles"></param>
         /// <param name="numColumns"></param>
         /// <param name="encodedData"></param>
-        private HtmPredictionEngine RunTraining(int inputBits, int maxCycles, int numColumns, List<Dictionary<string, int[]>> encodedData, EncoderBase encoder)
+        /// <param name="encoderDateTime"></param>
+        /// <param name="trainedHTMmodel"></param>
+        private void RunTraining(int inputBits, int maxCycles, int numColumns, List<Dictionary<string, int[]>> encodedData, EncoderBase encoderDateTime, out HtmPredictionEngine trainedHTMmodel)
         {
+            Console.WriteLine("Started Learning...");
             /*
              * Running MultiSequence Learning experiment here
              */
-            var trainedHTMmodel = Run(inputBits, maxCycles, numColumns, encoder, encodedData);
+            trainedHTMmodel = Run(inputBits, maxCycles, numColumns, encoderDateTime, encodedData);
 
-            return trainedHTMmodel;
+            Console.WriteLine("Done Learning");
         }
 
         /// <summary>
         /// Takes user input and gives predicted label
         /// </summary>
-        /// <param name="trainedEngine">trained object of class HtmPredictionEngine which will be used to predict</param>
-        /// <param name="datafiles"></param>
-        /// <param name="db"></param>
-        public List<Dictionary<string,string>> RunPrediction(HtmPredictionEngine trainedEngine, Database db, List<Playlist> datafiles)
+        /// <param name="trainedEngine"></param>
+        private static void RunPrediction(HtmPredictionEngine trainedEngine)
         {
-            var logs = new List<String>();
-            //Random generated user date;
-            var userInput = HelperMethods.GenerateRandomInput(datafiles);
-            RandomUserInput = userInput.Name.ToString();
-            Console.WriteLine($"Random User Input : {userInput.Name.ToString()}");
-            logs.Add($"Random User Input : {userInput.Name.ToString()}");
-            Dictionary<string, string> pVal;
-            int[] sdr = HelperMethods.EncodeSingleInput(userInput, db);
-            trainedEngine.Reset();
-            var predictedValuesForUserInput = trainedEngine.Predict(sdr);
-            if (predictedValuesForUserInput.Count > 0)
+            Debug.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
+            Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
+
+            var userInput = Console.ReadLine();
+
+            while (!userInput.Equals("q") && userInput != "Q")
             {
-                foreach (var predictedVal in predictedValuesForUserInput)
+                if (userInput != null)
                 {
-                    pVal = new Dictionary<string, string>();
-                    var playlist = predictedVal.PredictedInput.Split('_').First();
-                    var song = predictedVal.PredictedInput.Split('-').Last();
-                    Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song}");
-                    logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song}");
-                    pVal.Add(predictedVal.Similarity.ToString(), $"{playlist}-{song}");
-                    //MultiSequenceLearning.PredictedValues.Add(pVal);
-                    UserPredictedValues?.Add(pVal);
-
+                    var sdr = Helper4Power.EncodeSingleInput(userInput);
+                    trainedEngine.Reset();
+                    var predictedValuesForUserInput = trainedEngine.Predict(sdr);
+                    if (predictedValuesForUserInput.Count > 0)
+                    {
+                        foreach (var predictedVal in predictedValuesForUserInput)
+                        {
+                            Console.WriteLine("SIMILARITY " + predictedVal.Similarity + " PREDICTED VALUE :" + predictedVal.PredictedInput);
+                        }
+                    }
+                    else
+                        Console.WriteLine("Nothing predicted :(");
                 }
+                Console.WriteLine("PLEASE ENTER DATE FOR PREDICTING POWER CONSUMPTION:      *note format->dd/mm/yy hh:00");
+                userInput = Console.ReadLine();
             }
-            else
-            {
-                Console.WriteLine("Nothing predicted :(");
-                logs.Add("Nothing predicted :(");
-            }
-
-            File.AppendAllLines(OutputPath, logs);
-
-            return UserPredictedValues;
-
         }
 
         /// <summary>
@@ -134,7 +126,7 @@ namespace SongPredection
         public HtmPredictionEngine Run(int inputBits, int maxCycles, int numColumns, EncoderBase encoder, List<Dictionary<string, int[]>> sequences)
         {
             /* HTM Config */
-            var htmConfig = HelperMethods.FetchHTMConfig(inputBits, numColumns);
+            var htmConfig = Helper4Power.FetchHTMConfig(inputBits, numColumns);
 
             /* Creating Connections */
             var mem = new Connections(htmConfig);
@@ -160,7 +152,7 @@ namespace SongPredection
             var OUTPUT_trainingAccuracy_graph = new List<Dictionary<int, double>>();
 
             /* Minimum Cycles */
-            int numUniqueInputs = GetNumberOfInputs(sequences);
+            int numUniqueInputs = sequences.Count;
 
             // For more information see following paper: https://www.scitepress.org/Papers/2021/103142/103142.pdf
             HomeostaticPlasticityController hpc = new HomeostaticPlasticityController(mem, numUniqueInputs, (isStable, numPatterns, actColAvg, seenInputs) =>
@@ -211,7 +203,6 @@ namespace SongPredection
                 computeCycle++;
                 newbornCycle++;
                 Debug.WriteLine($"-------------- Newborn Cycle {newbornCycle} ---------------");
-                Console.WriteLine($"-------------- Training SP Newborn Cycle {newbornCycle} ---------------");
 
                 /* For each sequence in multi-sequence --- Loop 2 */
                 foreach (var sequence in sequences)
@@ -219,8 +210,9 @@ namespace SongPredection
                     /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var element in sequence)
                     {
-                        var observationClass = element.Key; // OBSERVATION LABEL or SEQUENCE LABEL
-                        var elementSDR = element.Value; // ELEMENT IN GiVEN SEQUENCE
+                        string[] splitKeyv = element.Key.Split(",");
+                        var observationClass = splitKeyv[0]; // OBSERVATION LABEL || SEQUENCE LABEL
+                        var elementSDR = element.Value; // ELEMENT IN ONE SEQUENCE
 
                         Debug.WriteLine($"-------------- {observationClass} ---------------");
 
@@ -242,8 +234,7 @@ namespace SongPredection
             // We activate here the Temporal Memory algorithm.
             layer1.HtmModules.Add("tm", tm);
 
-            //initial value which will never occur 
-            var lastPredictedValue = new List<string>(new string[] { "0" }); ;
+            string lastPredictedValue = "-1";
             List<string> lastPredictedValueList = new List<string>();
             double lastCycleAccuracy = 0;
             double accuracy = 0;
@@ -259,15 +250,9 @@ namespace SongPredection
                 var tempLOGGRAPH = new Dictionary<int, double>();
                 double SaturatedAccuracyCount = 0;
 
-                int maxPrevInputs = sequence.Count;
-                List<string> prevInputs = new List<string>();
-
-                prevInputs.Add("SX");
-
                 /* Loop until maxCycles --- Loop 2*/
                 for (int i = 0; i < maxCycles; i++)
                 {
-                    Console.WriteLine($"-------------- Training SP+TM Newborn Cycle {i} ---------------");
                     List<string> ElementWiseClasses = new List<string>();
 
                     /* Element in sequenc match counter */
@@ -276,45 +261,29 @@ namespace SongPredection
                     /* For each element (dictionary) in sequence --- Loop 3 */
                     foreach (var Elements in sequence)
                     {
-
-                        // key,value = PlaylistNo-SongNo,SDR(song) 
-                        var observationLabel = Elements.Key;
+                        string[] splitKey = Elements.Key.Split(",");
+                        var observationLabel = splitKey[0];
 
                         var lyrOut = new ComputeCycle();
 
                         /* Get Compute Cycle */
-                        //Compute(key)  <= this should be correct
                         lyrOut = layer1.Compute(Elements.Value, learn) as ComputeCycle;
                         Debug.WriteLine(string.Join(',', lyrOut.ActivColumnIndicies));
-
-                        prevInputs.Add(observationLabel.Split('-')[1]);
-                        if (prevInputs.Count > (maxPrevInputs + 1))
-                            prevInputs.RemoveAt(0);
-
-                        // In the pretrained SP with HPC, the TM will quickly learn cells for patterns
-                        // In that case the starting sequence 4-5-6 might have the sam SDR as 1-2-3-4-5-6,
-                        // Which will result in returning of 4-5-6 instead of 1-2-3-4-5-6.
-                        // HtmClassifier allways return the first matching sequence. Because 4-5-6 will be as first
-                        // memorized, it will match as the first one.
-                        if (prevInputs.Count < maxPrevInputs)
-                            continue;
-
-                        string key = GetKey(prevInputs, observationLabel);
 
                         /* Get Active Cells */
                         List<Cell> actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
 
-                        /* Learn the combination of Label and Active Cells   key = PlaylistNo-SongNo */
-                        cls.Learn(key, actCells.ToArray());
+                        /* Learn the combination of Label and Active Cells */
+                        cls.Learn(observationLabel, actCells.ToArray());
 
-                        if (lastPredictedValue.Contains(key))
+                        if (lastPredictedValue == observationLabel && lastPredictedValue != "")
                         {
                             elementMatches++;
-                            Debug.WriteLine($"Match. Actual value: {key} - Predicted value: {lastPredictedValue.FirstOrDefault(key)}");
+                            Debug.WriteLine($"Match. Actual value: {observationLabel} - Predicted value: {lastPredictedValue}");
                         }
                         else
                         {
-                            Debug.WriteLine($"Mismatch! Actual value: {key} - Predicted values: {String.Join(',', lastPredictedValue)}");
+                            Debug.WriteLine($"Mismatch! Actual value: {observationLabel} - Predicted values: {lastPredictedValue}");
                         }
 
                         Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
@@ -327,7 +296,7 @@ namespace SongPredection
                         {
                             var predictedInputValue = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
 
-                            Debug.WriteLine($"Current Input: {key}");
+                            Debug.WriteLine($"Current Input: {observationLabel}");
                             Debug.WriteLine("The predictions with similarity greater than 50% are");
 
                             foreach (var t in predictedInputValue)
@@ -339,43 +308,46 @@ namespace SongPredection
                                 }
                             }
 
-                            lastPredictedValue = predictedInputValue.Select(v => v.PredictedInput).ToList();
+                            lastPredictedValue = predictedInputValue.First().PredictedInput;
 
+                        }
+                    }
+
+                    accuracy = ((double)elementMatches / (sequence.Count)) * 100;
+                    Debug.WriteLine($"Cycle : {i} \t Accuracy:{accuracy}");
+                    tempLOGGRAPH.Add(i, accuracy);
+                    if (accuracy == 100)
+                    {
+                        SequencesMatchCount++;
+                        if (SequencesMatchCount >= 30)
+                        {
+                            tempLOGFILE.Add(i, $"Cycle : {i} \t  Accuracy:{accuracy} \t Number of times repeated {SequencesMatchCount}");
+                            break;
+                        }
+                        tempLOGFILE.Add(i, $"Cycle : {i} \t  Accuracy:{accuracy} \t Number of times repeated {SequencesMatchCount}");
+
+                    }
+                    else if (lastCycleAccuracy == accuracy && accuracy != 0)
+                    {
+                        SaturatedAccuracyCount++;
+                        if (SaturatedAccuracyCount >= 20 && lastCycleAccuracy > 70)
+                        {
+                            Debug.WriteLine($"NO FURTHER ACCURACY CAN BE ACHIEVED");
+                            Debug.WriteLine($"Saturated Accuracy : {lastCycleAccuracy} \t Number of times repeated {SaturatedAccuracyCount}");
+                            tempLOGFILE.Add(i, $"Cycle: {i} \t Accuracy:{accuracy} \t Number of times repeated {SaturatedAccuracyCount}");
+                            break;
                         }
                         else
                         {
-                            Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
-                            lastPredictedValue = new List<string>();
+                            tempLOGFILE.Add(i, $"Cycle: {i} \t Saturated Accuracy : {lastCycleAccuracy} \t Number of times repeated {SaturatedAccuracyCount}");
                         }
                     }
-
-                    double maxPossibleAccuraccy = (double)((double)sequence.Count - 1) / (double)sequence.Count * 100.0;
-
-                    accuracy = (double)elementMatches / (double)sequence.Count * 100.0;
-
-                    Debug.WriteLine($"Cycle : {i} \t Accuracy:{accuracy}");
-                    tempLOGGRAPH.Add(i, accuracy);
-                    if (accuracy >= maxPossibleAccuraccy)
-                    {
-                        SequencesMatchCount++;
-                        Debug.WriteLine($"100% accuracy reched {SequencesMatchCount} times.");
-                        Console.WriteLine($"100% accuracy reched {SequencesMatchCount} times.");
-                        tempLOGFILE.Add(i, $"Cycle : {i} \t  Accuracy:{accuracy} as 100% \t Number of times repeated {SequencesMatchCount}");
-                        Accuracy.Add(accuracy);
-                        if (SequencesMatchCount >= 30)
-                        {
-                            SaturatedAccuracyCount++;
-                            tempLOGFILE.Add(i, $"Cycle : {i} \t  SaturatedAccuracyCount : {SaturatedAccuracyCount} \t SequenceMatchCount : {SequencesMatchCount} >= 30 breaking..");
-                            break;
-                        }
-                    }
-                    else if (SequencesMatchCount >= 0)
+                    else
                     {
                         SaturatedAccuracyCount = 0;
                         SequencesMatchCount = 0;
                         lastCycleAccuracy = accuracy;
-                        tempLOGFILE.Add(i, $"Cycle : {i} \t Accuracy :{accuracy} \t ");
-                        Accuracy.Add(accuracy);
+                        tempLOGFILE.Add(i, $"cycle : {i} \t Accuracy :{accuracy} \t ");
                     }
                     lastPredictedValueList.Clear();
 
@@ -394,22 +366,18 @@ namespace SongPredection
             //****************DISPLAY STATUS OF EXPERIMENT
             Debug.WriteLine("-------------------TRAINING END------------------------");
             Console.WriteLine("-----------------TRAINING END------------------------");
-            string timespend = $"Training Time : {timeSpan.TotalMinutes} total minutes and {timeSpan.Seconds} seconds";
-            Console.WriteLine(timespend);
+            Console.WriteLine($"Training Time : {timeSpan.Minutes} minutes and {timeSpan.Seconds} seconds");
             Debug.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS---------------------");
             Console.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS------------------------");
             //*****************
 
             DateTime now = DateTime.Now;
-            string filename = now.ToString("g");
-            // remove any / or : or -
-            filename = filename.Replace("/", "");
-            filename = filename.Replace("-", "");
-            filename = filename.Replace(":", "");
-            filename = $"SongPrediction_{filename.Split(" ")[0]}_{now.Ticks.ToString()}.txt";
-            string path = Path.Combine(HelperMethods.BasePath, filename);
-            OutputPath = path;
-            using (StreamWriter swOutput = File.CreateText(OutputPath))
+            string filename = now.ToString("g"); //
+
+            filename = $"PowerConsumptionPredictionExperiment_{filename.Split(" ")[0]}_{now.Ticks.ToString()}.txt";
+            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName, $"TrainingLogs/{filename}");
+
+            using (StreamWriter swOutput = File.CreateText(path))
             {
                 swOutput.WriteLine($"{filename}");
                 foreach (var SequencelogCycle in OUTPUT_LOG_LIST)
@@ -423,68 +391,37 @@ namespace SongPredection
 
                 }
             }
-            File.AppendAllText(OutputPath, $"{timespend} \n");
+
             Debug.WriteLine("-------------------TRAINING LOGS HAS BEEN CREATED---------------------");
             Console.WriteLine("-------------------TRAINING LOGS HAS BEEN CREATED------------------------");
 
-            return new HtmPredictionEngine { Layer = layer1, Connections = mem, Classifier = cls };
+            return new HtmPredictionEngine { Layer = layer1, Classifier = cls, Connections = mem };
         }
 
-        private string GetKey(List<string> prevInputs, string observationLabel)
+        public class HtmPredictionEngine
         {
-            string playlistName = observationLabel.Split('-')[0];
-            string key = String.Empty;
-            for (int i = 0; i < prevInputs.Count; i++)
+            public void Reset()
             {
-                if (i > 0)
-                    key += "-";
+                var tm = this.Layer.HtmModules.FirstOrDefault(m => m.Value is TemporalMemory);
+                ((TemporalMemory)tm.Value).Reset(this.Connections);
+            }
+            public List<ClassifierResult<string>> Predict(int[] input)
+            {
+                var lyrOut = this.Layer.Compute(input, false) as ComputeCycle;
 
-                key += prevInputs[i];
+                List<ClassifierResult<string>> predictedInputValues = this.Classifier.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+
+                return predictedInputValues;
             }
 
-            return $"{playlistName}_{key}";
-        }
+            public Connections Connections { get; set; }
 
-        /// <summary>
-        /// Gets the number of all unique inputs.
-        /// </summary>
-        /// <param name="sequences">Alle sequences.</param>
-        /// <returns></returns>
-        private int GetNumberOfInputs(List<Dictionary<string, int[]>> sequences)
-        {
-            int num = 0;
+            public CortexLayer<object, object> Layer { get; set; }
 
-            foreach (var sequence in sequences)
-            {
-                num += sequence.Count;
-            }
-
-            return num;
+            public HtmClassifier<string, ComputeCycle> Classifier { get; set; }
         }
 
 
-    }
-    public class HtmPredictionEngine
-    {
-        public void Reset()
-        {
-            var tm = this.Layer.HtmModules.FirstOrDefault(m => m.Value is TemporalMemory);
-            ((TemporalMemory)tm.Value).Reset(this.Connections);
-        }
-        public List<ClassifierResult<string>> Predict(int[] input)
-        {
-            var lyrOut = this.Layer.Compute(input, false) as ComputeCycle;
-
-            List<ClassifierResult<string>> predictedInputValues = this.Classifier.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
-
-            return predictedInputValues;
-        }
-
-        public Connections Connections { get; set; }
-
-        public CortexLayer<object, object> Layer { get; set; }
-
-        public HtmClassifier<string, ComputeCycle> Classifier { get; set; }
     }
 
 }

@@ -1,0 +1,82 @@
+[
+  {
+    "Name": "Perfect",
+    "Singer1": "Ed Sheeran",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Romantic"
+  },
+  {
+    "Name": "All of Me",
+    "Singer1": "John Legend",
+    "Singer2": "",
+    "Genre1": "R&B",
+    "Genre2": "",
+    "Mood": "Intimate"
+  },
+  {
+    "Name": "Amazed",
+    "Singer1": "Lonestar",
+    "Singer2": "",
+    "Genre1": "Country",
+    "Genre2": "",
+    "Mood": "Adoring"
+  },
+  {
+    "Name": "I Don't Want to Miss a Thing",
+    "Singer1": "Aerosmith",
+    "Singer2": "",
+    "Genre1": "Rock",
+    "Genre2": "",
+    "Mood": "Passionate"
+  },
+  {
+    "Name": "Unchained Melody",
+    "Singer1": "The Righteous Brothers",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Sentimental"
+  },
+  {
+    "Name": "My Heart Will Go On",
+    "Singer1": "Celine Dion",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Tender"
+  },
+  {
+    "Name": "Thinking Out Loud",
+    "Singer1": "Ed Sheeran",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Romantic"
+  },
+  {
+    "Name": "I Will Always Love You",
+    "Singer1": "Whitney Houston",
+    "Singer2": "",
+    "Genre1": "R&B",
+    "Genre2": "",
+    "Mood": "Heartfelt"
+  },
+  {
+    "Name": "Bleeding Love",
+    "Singer1": "Leona Lewis",
+    "Singer2": "",
+    "Genre1": "Pop",
+    "Genre2": "",
+    "Mood": "Yearning"
+  },
+  {
+    "Name": "Can't Help Falling in Love",
+    "Singer1": "Elvis Presley",
+    "Singer2": "",
+    "Genre1": "Rock and Roll",
+    "Genre2": "",
+    "Mood": "Enchanted"
+  }
+]
