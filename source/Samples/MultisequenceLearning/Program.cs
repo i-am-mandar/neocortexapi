@@ -16,7 +16,7 @@ namespace MultisequenceLearning
         {
             Console.WriteLine("Starting Song Prediction experiment...");
 
-            //crating list of files which contains playlist
+            //crating list of dataset files which contains playlist
             List<String> playlists = new List<String>();
             playlists.Add("playlist1.json");
             playlists.Add("romantic_playlist.json");
@@ -24,38 +24,45 @@ namespace MultisequenceLearning
             playlists.Add("sporty_playlist.json");
             playlists.Add("energetic_playlist.json");
 
-            //reading all files and creating list of playlists
+            //reading all dataset files and creating list of playlists
             Console.WriteLine("Reading playlists");
             var dataFiles = HelperMethods.GetPlaylists(playlists);
             Console.WriteLine("Reading playlists done..");
 
+            // creating an object of Database which hold unique values of the attributes of Song
             Console.WriteLine("Filling Database");
             var database = HelperMethods.FillDatabase(dataFiles);
             Console.WriteLine("Filling Database done..");
 
+            // creating scalarized objects of Playlist and Song
             Console.WriteLine("Getting Scalar Values");
             var scalarDataSet = HelperMethods.ScalarlizePlaylists(dataFiles, database);
             Console.WriteLine("Getting Scalar Values done..");
 
+            // fetching song encoder
             Console.WriteLine("Getting Song Encoder");
             var songEncoder = HelperMethods.GetSongEncoder(database);
             Console.WriteLine("Getting Song Encoder done...");
 
+            // encoding the playlist
             Console.WriteLine("Encoding Playlists");
-            var encodedPlaylists = HelperMethods.EncodePlaylists(scalarDataSet, songEncoder, database);
+            var encodedPlaylists = HelperMethods.EncodePlaylists(scalarDataSet, database);
             Console.WriteLine("Encoding Playlists done...");
 
+            // running the experiment
             Console.WriteLine("Running Multisequence Learning experiment");
             int inputBits = HelperMethods.GetInputBits(database);
             MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
             var model = multiSequenceLearning.StartExperiment(encodedPlaylists, database, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
 
+            // decoding/reverse mapping the predicted values
             Console.WriteLine("Decoding Predictions");
             var predictions = multiSequenceLearning.RunPrediction(model,database, dataFiles);
             var decodedPredictions = HelperMethods.DecodePrediction(predictions, dataFiles);
             Console.WriteLine("Completed Predictions");
 
+            // displaying the prediced result
             if(decodedPredictions.Count>0)
             {
                 foreach(var item in decodedPredictions)
