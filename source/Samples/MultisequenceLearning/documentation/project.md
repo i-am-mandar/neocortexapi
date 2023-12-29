@@ -181,7 +181,7 @@ Below is the implementation of song recommendation program:
 
 Key created from the song in a playlist holds significance important for learning the sequence. So each playlist is given a unique name and each song hold a unique entry in `Database`. The key is created by as `{Playlist.Name}-{Song1}-{Song2}-{Song3}-{Song4} and so on` adding the song at end of key and learn with a SDR of a last song in the key.
 
-Once the learing part is done, a song is selected at random from a random playlist and prediction is executed. On the result of the prediction, the key is mapped back after looking in `Database` and songs are displayed. 
+Once the learning part is done, a song is selected at random from a random playlist and prediction is executed. On the result of the prediction, the key is mapped back after looking in `Database` and songs are displayed. 
 
 ### Improvement
 
@@ -189,13 +189,13 @@ Once the learing part is done, a song is selected at random from a random playli
 
     When we consider null values for each attribute, we add one more tuple and this can be filled when we do not know the value or the value is actually null.
 
-    eg: Usually a song has primary singer and secondary singer but not all songs have them, so in such cases we can will secondary singer a null and consider singer 2 as attribute while learning
+    eg: Usually a song has a primary singer and secondary singer but not all songs have a known singer, or the artist might be unknown. So, in such scenarios we can assign a value which adds one more tuple and increases some meaning while learning for unknown attributes.
 
 2. Consider all significant possible parameters for inputs
 
     This improvement comes from the previous improvement where null values should be filled with a data, this helps to use new attribute while learing.
 
-    eg: Usually a song has primary singer and secondary singer but not all songs have them, so in such cases we can will secondary singer a null and consider singer 2 as attribute while learning
+    eg: Usually a song has a primary singer and secondary singer but not all songs have them, so in such cases we can have secondary singer a null and consider singer 2 as attribute while learning.
 
 3. Create larger dataset to improve input sequences
 
