@@ -12,7 +12,7 @@ namespace NeoCortexApi.Entities
     /// <summary>
     /// Used as container for properties, which define topology of HTM module.
     /// </summary>
-    public class HtmModuleTopology
+    public class HtmModuleTopology /*: ISerializable*/
     {
         public HtmModuleTopology()
         {
@@ -65,7 +65,7 @@ namespace NeoCortexApi.Entities
         #region Serialization
         public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(HtmModuleTopology), writer);
 
@@ -81,7 +81,7 @@ namespace NeoCortexApi.Entities
         {
             HtmModuleTopology htm = new HtmModuleTopology();
 
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
@@ -96,7 +96,7 @@ namespace NeoCortexApi.Entities
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
@@ -127,6 +127,16 @@ namespace NeoCortexApi.Entities
 
             return htm;
         }
+
+        //public void Serialize(object obj, string name, StreamWriter sw)
+        //{
+        //    HtmSerializer2.SerializeObject(obj, name, sw);
+        //}
+
+        //public static object Deserialize(StreamReader sr, string name)
+        //{
+        //    return HtmSerializer2.DeserializeObject<HtmModuleTopology>(sr, name);
+        //}
         #endregion
 
     }

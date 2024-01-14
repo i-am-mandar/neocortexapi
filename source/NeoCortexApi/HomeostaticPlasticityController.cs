@@ -18,7 +18,12 @@ namespace NeoCortexApi
     /// and switches-off the boosting mechanism (new-born effect) after the SP has entered a stable state 
     /// for all seen input patterns.
     /// </summary>
-    public class HomeostaticPlasticityController
+    /// <remarks>
+    /// The research related to this component can be found here:
+    /// https://rdcu.be/cIcoc published 2022 in Springer Nature Computer Sciences.
+    /// The first part of this research can be found here: https://pdfs.semanticscholar.org/be3e/97813b6cbcbdbba591e84b610fced628eb22.pdf
+    /// </remarks>
+    public class HomeostaticPlasticityController : ISerializable
     {
         private double m_RequiredSimilarityThreshold;
 
@@ -59,6 +64,7 @@ namespace NeoCortexApi
         /// </summary>
         private Action<bool, int, double, int> m_OnStabilityStatusChanged;
 
+        public Action<bool, int, double, int> OnStabilityStatusChanged { get => m_OnStabilityStatusChanged; set => m_OnStabilityStatusChanged = value; }
         /// <summary>
         /// Set on true when SP deactivates boosting and enter the stable state.
         /// Once SP enters the stable state and it becomes instable again, this value is set on false.
@@ -105,7 +111,7 @@ namespace NeoCortexApi
         /// </summary>
         /// <param name="input">The input of the SP in the current cycle.</param>
         /// <param name="output">The output SDR of the Spatial Pooler compute cycle.</param>
-        /// <returns></returns>
+        /// <returns>True if the PS has enetered the stable state.</returns>
         public bool Compute(int[] input, int[] output)
         {
             bool res = false;
@@ -235,6 +241,10 @@ namespace NeoCortexApi
             return sum / max;
         }
 
+        public void SetConnections(Connections connections)
+        {
+            this.m_HtmMemory = connections;
+        }
 
         /// <summary>
         /// Calculates how many elements of the array are same in percents. This method is useful to compare 
@@ -268,7 +278,7 @@ namespace NeoCortexApi
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        internal static string GetHash(int[] input)
+        public static string GetHash(int[] input)
         {
             List<byte> buff = new List<byte>();
 
@@ -285,6 +295,93 @@ namespace NeoCortexApi
                 return Encoding.UTF8.GetString(data);
             }
         }
+
+        //public static HomeostaticPlasticityController Deserialize(StreamReader sr, Connections htmMemory = null)
+        //{
+        //    HomeostaticPlasticityController ctrl = new HomeostaticPlasticityController();
+        //    ctrl.m_HtmMemory = htmMemory;
+
+        //    HtmSerializer2 ser = new HtmSerializer2();
+
+        //    while (sr.Peek() >= 0)
+        //    {
+        //        string data = sr.ReadLine();
+        //        if (data == String.Empty || data == ser.ReadBegin(nameof(HomeostaticPlasticityController)))
+        //        {
+        //            continue;
+        //        }
+        //        else if (data == ser.ReadBegin(nameof(Connections)))
+        //        {
+        //            ctrl.m_HtmMemory = Connections.Deserialize(sr);
+        //        }
+        //        else if (data == ser.ReadEnd(nameof(HomeostaticPlasticityController)))
+        //        {
+        //            break;
+        //        }
+        //        else
+        //        {
+        //            string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+        //            for (int i = 0; i < str.Length; i++)
+        //            {
+        //                switch (i)
+        //                {
+        //                    case 0:
+        //                        {
+        //                            ctrl.m_RequiredSimilarityThreshold = ser.ReadDoubleValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 1:
+        //                        {
+        //                            ctrl.m_MaxPreviousElements = ser.ReadIntValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 2:
+        //                        {
+        //                            ctrl.m_Cycle = ser.ReadIntValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 3:
+        //                        {
+        //                            ctrl.m_MinCycles = ser.ReadIntValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 4:
+        //                        {
+        //                            ctrl.m_RequiredNumOfStableCycles = ser.ReadIntValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 5:
+        //                        {
+        //                            ctrl.m_NumOfStableCyclesForInput = ser.ReadDictSIValue(str[i]);
+        //                            break;
+        //                        }
+        //                    case 6:
+        //                        {
+        //                            ctrl.m_NumOfActiveColsForInput = ser.ReadDictSIarray(str[i]);
+        //                            break;
+        //                        }
+        //                    case 7:
+        //                        {
+        //                            ctrl.m_InOutMap = ser.ReadDictSIarray(str[i]);
+        //                            break;
+        //                        }
+
+        //                    case 8:
+        //                        {
+        //                            ctrl.m_IsStable = ser.ReadBoolValue(str[i]);
+        //                            break;
+        //                        }
+        //                    default:
+        //                        { break; }
+
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return ctrl;
+
+        //}
 
         /// <summary>
         /// Traces out all cell indicies grouped by input value.
@@ -359,11 +456,11 @@ namespace NeoCortexApi
                 return false;
             else if (m_RequiredNumOfStableCycles != obj.m_RequiredNumOfStableCycles)
                 return false;
-            else if (!m_NumOfStableCyclesForInput.SequenceEqual(obj.m_NumOfStableCyclesForInput) && !m_NumOfActiveColsForInput.SequenceEqual(m_NumOfActiveColsForInput) && !m_InOutMap.SequenceEqual(m_InOutMap))
+            else if (!m_NumOfStableCyclesForInput.ElementsEqual(obj.m_NumOfStableCyclesForInput) && !m_NumOfActiveColsForInput.ElementsEqual(m_NumOfActiveColsForInput) && !m_InOutMap.ElementsEqual(m_InOutMap))
                 return false;
             else if (m_IsStable != obj.m_IsStable)
                 return false;
-           
+
             return true;
 
         }
@@ -371,10 +468,10 @@ namespace NeoCortexApi
         #region Serialization
         public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(HomeostaticPlasticityController), writer);
-            
+
             ser.SerializeValue(this.m_RequiredSimilarityThreshold, writer);
             ser.SerializeValue(this.m_MaxPreviousElements, writer);
             ser.SerializeValue(this.m_Cycle, writer);
@@ -384,21 +481,21 @@ namespace NeoCortexApi
             ser.SerializeValue(this.m_NumOfActiveColsForInput, writer);
             ser.SerializeValue(this.m_InOutMap, writer);
             ser.SerializeValue(this.m_IsStable, writer);
-            
+
             if (this.m_HtmMemory != null)
             {
                 this.m_HtmMemory.Serialize(writer);
             }
-            
+
             ser.SerializeEnd(nameof(HomeostaticPlasticityController), writer);
-            
+
         }
 
         public static HomeostaticPlasticityController Deserialize(StreamReader sr)
         {
             HomeostaticPlasticityController ctrl = new HomeostaticPlasticityController();
 
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
@@ -417,7 +514,7 @@ namespace NeoCortexApi
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
@@ -462,7 +559,7 @@ namespace NeoCortexApi
                                     ctrl.m_InOutMap = ser.ReadDictSIarray(str[i]);
                                     break;
                                 }
-                            
+
                             case 8:
                                 {
                                     ctrl.m_IsStable = ser.ReadBoolValue(str[i]);
@@ -478,6 +575,53 @@ namespace NeoCortexApi
 
             return ctrl;
 
+        }
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            var excludeEntries = new List<string>
+            {
+                nameof(m_OnStabilityStatusChanged),
+                nameof(OnStabilityStatusChanged),
+                nameof(m_InOutMap)
+            };
+
+            if (obj is HomeostaticPlasticityController controller)
+            {
+                HtmSerializer.SerializeObject(obj, name, sw, excludeEntries);
+                var convertInOutMap = controller.m_InOutMap.ToDictionary(kv => kv.Key, kv => new KeyValuePair<int, int[]>(kv.Value.Length, ArrayUtils.IndexesWithNonZeros(kv.Value)));
+                HtmSerializer.Serialize(convertInOutMap, "convertInOutMap", sw);
+            }
+
+
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            var excludeEntries = new List<string> { "convertInOutMap" };
+
+            var controller = HtmSerializer.DeserializeObject<T>(sr, name, excludeEntries, (obj, propName) =>
+            {
+                if (obj is HomeostaticPlasticityController hpc)
+                {
+                    if (propName == "convertInOutMap")
+                    {
+                        var convertInOutMap = HtmSerializer.Deserialize<Dictionary<string, KeyValuePair<int, int[]>>>(sr, propName);
+
+                        Dictionary<string, int[]> inOutMap = new Dictionary<string, int[]>();
+                        foreach (var map in convertInOutMap)
+                        {
+                            var array = new int[map.Value.Key];
+                            ArrayUtils.FillArray(array, 0);
+                            ArrayUtils.SetIndexesTo(array, map.Value.Value, 1);
+                            inOutMap[map.Key] = array;
+                        }
+                        hpc.m_InOutMap = inOutMap;
+                    }
+                }
+            });
+
+            return controller;
         }
         #endregion
     }

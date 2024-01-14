@@ -12,22 +12,12 @@ namespace NeoCortexApi.Entities
     /// Segments are owned by <see cref="Cell"/>s and in turn own <see cref="Synapse"/>s which are obversely connected to by a "source cell", 
     /// which is the <see cref="Cell"/> which will activate a given <see cref="Synapse"/> owned by this <see cref="Segment"/>.
     /// </summary>
-    public class DistalDendrite : Segment, IComparable<DistalDendrite>, IEquatable<DistalDendrite>
+    public class DistalDendrite : Segment, IComparable<Segment>, IEquatable<Segment>, ISerializable
     {
-        /// <summary>
-        /// The cell that owns (parent) the segment.
-        /// </summary>        
-        public Cell ParentCell;
-
-        private long m_LastUsedIteration;
-
+     
         private int m_Ordinal = -1;
 
-        /// <summary>
-        /// the last iteration in which this segment was active.
-        /// </summary>
-        public long LastUsedIteration { get => m_LastUsedIteration; set => m_LastUsedIteration = value; }
-
+       
         /// <summary>
         /// The seqence number of the segment. Specifies the order of the segment of the <see cref="Connections"/> instance.
         /// </summary>
@@ -54,11 +44,10 @@ namespace NeoCortexApi.Entities
         /// If some segments are destroyed, this number is still incrementd.</param>
         /// <param name="synapsePermConnected"></param>
         /// <param name="numInputs"></param>
-        public DistalDendrite(Cell parentCell, int flatIdx, long lastUsedIteration, int ordinal, double synapsePermConnected, int numInputs) : base(flatIdx, synapsePermConnected, numInputs)
+        public DistalDendrite(Cell parentCell, int flatIdx, long lastUsedIteration, int ordinal, double synapsePermConnected, int numInputs) : base(flatIdx, lastUsedIteration, synapsePermConnected, numInputs)
         {
             this.ParentCell = parentCell;
-            this.m_Ordinal = ordinal;
-            this.m_LastUsedIteration = lastUsedIteration;
+            this.m_Ordinal = ordinal;   
         }
 
 
@@ -79,10 +68,17 @@ namespace NeoCortexApi.Entities
         public override int GetHashCode()
         {
             int prime = 31;
-            int result = base.GetHashCode();
+            int result = 1;
             result = prime * result + ((ParentCell == null) ? 0 : ParentCell.GetHashCode());
             result *= this.SegmentIndex;
             return result;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Segment distalDendrite))
+                return false;
+            return this.Equals(distalDendrite);
         }
 
         /// <summary>
@@ -106,10 +102,10 @@ namespace NeoCortexApi.Entities
             }
             // We check here the cell id only! The cell as parent must be correctlly created to avoid having different cells with the same id.
             // If we would use here ParenCell.Equals method, that method would cause a cicular invoke of this.Equals etc.
-            else if (ParentCell.CellId != other.ParentCell.CellId)
+            else if (ParentCell.Index != other.ParentCell.Index)
                 return false;
-            if (m_LastUsedIteration != other.m_LastUsedIteration)
-                return false;
+            //if (m_LastUsedIteration != other.m_LastUsedIteration)
+            //    return false;
             if (m_Ordinal != other.m_Ordinal)
                 return false;
             if (LastUsedIteration != other.LastUsedIteration)
@@ -123,7 +119,7 @@ namespace NeoCortexApi.Entities
                 if (obj.Synapses != null)
                     return false;
             }
-            else if (!Synapses.SequenceEqual(obj.Synapses))
+            else if (!Synapses.ElementsEqual(obj.Synapses))
                 return false;
             //if (boxedIndex == null)
             //{
@@ -139,14 +135,14 @@ namespace NeoCortexApi.Entities
 
             return true;
         }
-        
+
 
         /// <summary>
         /// Compares by index.
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public int CompareTo(DistalDendrite other)
+        public int CompareTo(Segment other)
         {
             if (this.SegmentIndex > other.SegmentIndex)
                 return 1;
@@ -157,18 +153,18 @@ namespace NeoCortexApi.Entities
         }
 
         #region Serialization
-        
+
         /// <summary>
         /// Only cell Serialize method should invoke this method!
         /// </summary>
         /// <param name="writer"></param>
         internal void SerializeT(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
-            ser.SerializeBegin(nameof(DistalDendrite), writer);
-            
-            ser.SerializeValue(this.m_LastUsedIteration, writer);
+            ser.SerializeBegin(nameof(Segment), writer);
+
+            //ser.SerializeValue(this.m_LastUsedIteration, writer);
             ser.SerializeValue(this.m_Ordinal, writer);
             ser.SerializeValue(this.LastUsedIteration, writer);
             ser.SerializeValue(this.Ordinal, writer);
@@ -186,24 +182,24 @@ namespace NeoCortexApi.Entities
             //{
             //    this.ParentCell.SerializeT(writer);
             //}
-            
+
             if (this.Synapses != null && this.Synapses.Count > 0)
                 ser.SerializeValue(this.Synapses, writer);
 
-            ser.SerializeEnd(nameof(DistalDendrite), writer);
+            ser.SerializeEnd(nameof(Segment), writer);
         }
 
         /// <summary>
         /// Serialize method for DistalDendrite
         /// </summary>
         /// <param name="writer"></param>
-        public override void Serialize(StreamWriter writer)
+        public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
-            ser.SerializeBegin(nameof(DistalDendrite), writer);
+            ser.SerializeBegin(nameof(Segment), writer);
 
-            ser.SerializeValue(this.m_LastUsedIteration, writer);
+            //ser.SerializeValue(this.LastUsedIteration, writer);
             ser.SerializeValue(this.m_Ordinal, writer);
             ser.SerializeValue(this.LastUsedIteration, writer);
             ser.SerializeValue(this.Ordinal, writer);
@@ -232,12 +228,12 @@ namespace NeoCortexApi.Entities
         {
             DistalDendrite distal = new DistalDendrite();
 
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
                 string data = sr.ReadLine();
-                if (data == String.Empty || data == ser.ReadBegin(nameof(DistalDendrite)) || data.ToCharArray()[0] == HtmSerializer2.ElementsDelimiter || (data.ToCharArray()[0] == HtmSerializer2.ElementsDelimiter && data.ToCharArray()[1] == HtmSerializer2.ParameterDelimiter))
+                if (data == String.Empty || data == ser.ReadBegin(nameof(Segment)) || data.ToCharArray()[0] == HtmSerializer.ElementsDelimiter || (data.ToCharArray()[0] == HtmSerializer.ElementsDelimiter && data.ToCharArray()[1] == HtmSerializer.ParameterDelimiter))
                 {
                     continue;
                 }
@@ -245,46 +241,46 @@ namespace NeoCortexApi.Entities
                 //{
                 //    distal.boxedIndex = Integer.Deserialize(sr);
                 //}
-                else if (data == ser.ReadBegin(nameof(Synapse)) )
+                else if (data == ser.ReadBegin(nameof(Synapse)))
                 {
                     distal.Synapses.Add(Synapse.Deserialize(sr));
                 }
-                else if ( data == ser.ReadBegin(nameof(Cell)))
+                else if (data == ser.ReadBegin(nameof(Cell)))
                 {
                     distal.ParentCell = Cell.Deserialize(sr);
                 }
-                else if (data == ser.ReadEnd(nameof(DistalDendrite)))
+                else if (data == ser.ReadEnd(nameof(Segment)))
                 {
                     break;
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
                         {
+                            //case 0:
+                            //    {
+                            //        distal.m_LastUsedIteration = ser.ReadLongValue(str[i]);
+                            //        break;
+                            //    }
                             case 0:
-                                {
-                                    distal.m_LastUsedIteration = ser.ReadLongValue(str[i]);
-                                    break;
-                                }
-                            case 1:
                                 {
                                     distal.m_Ordinal = ser.ReadIntValue(str[i]);
                                     break;
                                 }
-                            case 2:
+                            case 1:
                                 {
                                     distal.LastUsedIteration = ser.ReadLongValue(str[i]);
                                     break;
                                 }
-                            case 3:
+                            case 2:
                                 {
                                     distal.Ordinal = ser.ReadIntValue(str[i]);
                                     break;
                                 }
-                            case 4:
+                            case 3:
                                 {
                                     distal.SegmentIndex = ser.ReadIntValue(str[i]);
                                     break;
@@ -294,12 +290,12 @@ namespace NeoCortexApi.Entities
                                     distal.SynapsePermConnected = ser.ReadDoubleValue(str[i]);
                                     break;
                                 }
-                            case 6:
+                            case 4:
                                 {
                                     distal.NumInputs = ser.ReadIntValue(str[i]);
                                     break;
                                 }
-                            
+
                             default:
                                 { break; }
 
@@ -311,9 +307,48 @@ namespace NeoCortexApi.Entities
             return distal;
 
         }
-        
+
         #endregion
 
+        public static void Serialize1(StreamWriter sw, object obj, string propName)
+        {
+            HtmSerializer.SerializeObject(obj, propName, sw, new List<string>{nameof(Segment.ParentCell)});
+        }
+
+        public static Segment Deserialize1(StreamReader sr, string propName)
+        {
+
+            var result = HtmSerializer.DeserializeObject<Segment>(sr, propName);
+            return result;
+        }
+
+        private static List<int> isCellsSerialized = new List<int>();
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            var ignoreMembers = new List<string> 
+            { 
+                //nameof(DistalDendrite.ParentCell),
+                nameof(Segment.Synapses)
+            };
+            HtmSerializer.SerializeObject(obj, name, sw, ignoreMembers);
+            //var synapses = this.Synapses.Select(s => new Synapse() { SynapseIndex = s.SynapseIndex });
+            //HtmSerializer2.Serialize(synapses, nameof(Segment.Synapses), sw);
+
+            //var cell = (obj as DistalDendrite).ParentCell;
+
+            //if (cell != null && isCellsSerialized.Contains(cell.HashCode()) == false)
+            //{
+            //    isCellsSerialized.Add(cell.HashCode());
+            //    HtmSerializer2.Serialize((obj as DistalDendrite).ParentCell, nameof(DistalDendrite.ParentCell), sw, ignoreMembers: ignoreMembers);
+            //}
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            var distal = HtmSerializer.DeserializeObject<T>(sr, name);
+            return distal;
+        }
     }
 }
 

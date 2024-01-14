@@ -19,7 +19,11 @@ namespace UnitTestsProject
         private SpatialPooler sp;
         private Connections mem;
 
-        public void setupParameters()
+        /// <summary>
+        /// 
+        /// </summary>
+        [Obsolete($"Use {nameof(SetupHtmConfigParameters)}.")]
+        public void SetupParameters()
         {
             parameters = Parameters.getAllDefaultParameters();
             parameters.Set(KEY.INPUT_DIMENSIONS, new int[] { 5 });
@@ -123,7 +127,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void confirmSPConstruction()
         {
-            setupParameters();
+            SetupParameters();
 
             InitTestSPInstance();
 
@@ -192,7 +196,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testCompute1()
         {
-            setupParameters();
+            SetupParameters();
             parameters.Set(KEY.INPUT_DIMENSIONS, new int[] { 9 });
             parameters.Set(KEY.COLUMN_DIMENSIONS, new int[] { 5 });
             parameters.setPotentialRadius(5);
@@ -303,7 +307,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testCompute2()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 10 });
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setPotentialRadius(3);
@@ -600,7 +604,7 @@ namespace UnitTestsProject
         // [TestCategory("LongRunning")]
         public void perfTest()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 188, 1 });
             parameters.setColumnDimensions(new int[] { 2048, 10 });
             parameters.setPotentialRadius(94);
@@ -653,7 +657,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testExactOutput()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 1, 188 });
             parameters.setColumnDimensions(new int[] { 2048, 1 });
             parameters.setPotentialRadius(94);
@@ -716,7 +720,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testStripNeverLearned()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 6 });
             parameters.setInputDimensions(new int[] { 9 });
             InitTestSPInstance();
@@ -754,7 +758,7 @@ namespace UnitTestsProject
         public void testMapColumn()
         {
             // Test 1D
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 4 });
             parameters.setInputDimensions(new int[] { 12 });
             InitTestSPInstance();
@@ -765,7 +769,7 @@ namespace UnitTestsProject
             Assert.IsTrue(10 == HtmCompute.MapColumn(3, mem.HtmConfig.ColumnModuleTopology, mem.HtmConfig.InputModuleTopology));
 
             // Test 1D with same dimension of columns and inputs
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 4 });
             parameters.setInputDimensions(new int[] { 4 });
             InitTestSPInstance();
@@ -776,7 +780,7 @@ namespace UnitTestsProject
             Assert.IsTrue(3 == HtmCompute.MapColumn(3, mem.HtmConfig.ColumnModuleTopology, mem.HtmConfig.InputModuleTopology));
 
             // Test 1D with dimensions of length 1
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 1 });
             parameters.setInputDimensions(new int[] { 1 });
             InitTestSPInstance();
@@ -784,7 +788,7 @@ namespace UnitTestsProject
             Assert.IsTrue(0 == HtmCompute.MapColumn(0, mem.HtmConfig.ColumnModuleTopology, mem.HtmConfig.InputModuleTopology));
 
             // Test 2D
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 12, 4 });
             parameters.setInputDimensions(new int[] { 36, 12 });
             InitTestSPInstance();
@@ -796,7 +800,7 @@ namespace UnitTestsProject
             Assert.IsTrue(418 == HtmCompute.MapColumn(47, mem.HtmConfig.ColumnModuleTopology, mem.HtmConfig.InputModuleTopology));
 
             // Test 2D with some input dimensions smaller than column dimensions.
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 4, 4 });
             parameters.setInputDimensions(new int[] { 3, 5 });
             InitTestSPInstance();
@@ -811,7 +815,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testMapPotential1D()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 12 });
             parameters.setColumnDimensions(new int[] { 4 });
             parameters.setPotentialRadius(2);
@@ -867,7 +871,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testMapPotential2D()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 6, 12 });
             parameters.setColumnDimensions(new int[] { 2, 4 });
             parameters.setPotentialRadius(1);
@@ -922,7 +926,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testMapPotential1Column1Input()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 1 });
             parameters.setColumnDimensions(new int[] { 1 });
             parameters.setPotentialRadius(2);
@@ -971,7 +975,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInhibitColumns()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setInhibitionRadius(10);
             InitTestSPInstance();
@@ -1161,7 +1165,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testUpdateBoostFactors()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5/*Don't care*/ });
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setMaxBoost(10.0);
@@ -1178,7 +1182,7 @@ namespace UnitTestsProject
             mem.HtmConfig.ActiveDutyCycles = activeDutyCycles;
 
             double[] trueBoostFactors = new double[] { 1, 1, 1, 1, 1, 1 };
-            sp.UpdateBoostFactors(mem);
+            sp.BoostByActivationFrequency(mem);
             double[] boostFactors = mem.BoostFactors;
             for (int i = 0; i < boostFactors.Length; i++)
             {
@@ -1189,7 +1193,7 @@ namespace UnitTestsProject
             minActiveDutyCycles = new double[] { 0.1, 0.3, 0.02, 0.04, 0.7, 0.12 };
             mem.HtmConfig.MinActiveDutyCycles = minActiveDutyCycles;
             ArrayUtils.FillArray(mem.BoostFactors, 0);
-            sp.UpdateBoostFactors(mem);
+            sp.BoostByActivationFrequency(mem);
             boostFactors = mem.BoostFactors;
             for (int i = 0; i < boostFactors.Length; i++)
             {
@@ -1201,7 +1205,7 @@ namespace UnitTestsProject
             activeDutyCycles = new double[] { 0.01, 0.02, 0.002, 0.003, 0.07, 0.012 };
             mem.HtmConfig.ActiveDutyCycles = activeDutyCycles;
             trueBoostFactors = new double[] { 9.1, 9.1, 9.1, 9.1, 9.1, 9.1 };
-            sp.UpdateBoostFactors(mem);
+            sp.BoostByActivationFrequency(mem);
             boostFactors = mem.BoostFactors;
             for (int i = 0; i < boostFactors.Length; i++)
             {
@@ -1214,7 +1218,7 @@ namespace UnitTestsProject
             ArrayUtils.FillArray(activeDutyCycles, 0);
             mem.HtmConfig.ActiveDutyCycles = activeDutyCycles;
             ArrayUtils.InitArray(trueBoostFactors, 10.0);
-            sp.UpdateBoostFactors(mem);
+            sp.BoostByActivationFrequency(mem);
             boostFactors = mem.BoostFactors;
             for (int i = 0; i < boostFactors.Length; i++)
             {
@@ -1238,7 +1242,7 @@ namespace UnitTestsProject
 
             mem.HtmConfig.ActiveDutyCycles = activeDutyCycles;
 
-            sp.UpdateBoostFactors(mem);
+            sp.BoostByActivationFrequency(mem);
 
             Assert.IsTrue(mem.BoostFactors.SequenceEqual(originalBoostFactors));
         }
@@ -1248,7 +1252,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testUpdateInhibitionRadius()
         {
-            setupParameters();
+            SetupParameters();
             InitTestSPInstance();
 
             //Test global inhibition case
@@ -1346,7 +1350,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testAvgColumnsPerInput()
         {
-            setupParameters();
+            SetupParameters();
             InitTestSPInstance();
 
             mem.HtmConfig.ColumnDimensions = new int[] { 2, 2, 2, 2 };
@@ -1469,7 +1473,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testBumpUpWeakColumns()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 8 });
             parameters.setColumnDimensions(new int[] { 5 });
             InitTestSPInstance();
@@ -1516,7 +1520,7 @@ namespace UnitTestsProject
             }
 
             //Execute method being tested
-            sp.BumpUpWeakColumns(mem);
+            sp.BoostColsWithLowOverlap(mem);
 
             for (int i = 0; i < mem.HtmConfig.NumColumns; i++)
             {
@@ -1566,7 +1570,7 @@ namespace UnitTestsProject
             expectedList[0] = new int[] { 2047, 0, 1 };
             expectedList[1] = new int[] { 2046, 2047, 0 };
 
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 10 });
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setPotentialRadius(94);
@@ -1727,7 +1731,7 @@ namespace UnitTestsProject
             expectedList[0] = new int[] { 2047, 0, 1 };
             expectedList[1] = new int[] { 2046, 2047, 0 };
 
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 1, 188 });
             parameters.setColumnDimensions(new int[] { 2048, 1 });
             parameters.setPotentialRadius(94);
@@ -1938,7 +1942,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testUpdateMinDutyCycleGlobal()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
 
             parameters.setColumnDimensions(new int[] { 5 });
@@ -1996,7 +2000,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testIsUpdateRound()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
             parameters.setColumnDimensions(new int[] { 5 });
             InitTestSPInstance();
@@ -2034,7 +2038,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testAdaptSynapses()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 8 });
             parameters.setColumnDimensions(new int[] { 4 });
             parameters.setSynPermInactiveDec(0.01);
@@ -2150,7 +2154,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testRaisePermanenceThreshold()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setSynPermConnected(0.1);
@@ -2191,7 +2195,7 @@ namespace UnitTestsProject
             new double[]{0.101, 0.101, 0.101, 0.101, 0.101}};   // increment 9 times
 
             //FORGOT TO SET PERMANENCES ABOVE - DON'T USE mem.setPermanences() 
-            int[] indices = mem.HtmConfig.Memory.GetSparseIndices();
+            int[] indices = mem.Memory.GetSparseIndices();
             for (int i = 0; i < mem.HtmConfig.NumColumns; i++)
             {
                 // double[] perm = mem.getPotentialPools().get(i).getSparsePermanences();
@@ -2210,7 +2214,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testUpdatePermanencesForColumn()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
             parameters.setColumnDimensions(new int[] { 5 });
             parameters.setSynPermTrimThreshold(0.05);
@@ -2590,7 +2594,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInitPermanence1()
         {
-            setupParameters();
+            SetupParameters();
 
             sp = new SpatialPoolerMock4();
 
@@ -2650,7 +2654,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInitPermanence2()
         {
-            setupParameters();
+            SetupParameters();
 
             sp = new SpatialPoolerMock4();
 
@@ -2695,7 +2699,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testUpdateDutyCycleHelper()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
             parameters.setColumnDimensions(new int[] { 5 });
             InitTestSPInstance();
@@ -2741,7 +2745,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInhibitColumnsGlobal()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setColumnDimensions(new int[] { 10 });
             InitTestSPInstance();
             //Internally calculated during init, to overwrite we put after init
@@ -2777,7 +2781,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInhibitColumnsLocal()
         {
-            setupParameters();
+            SetupParameters();
             parameters.setInputDimensions(new int[] { 5 });
             parameters.setColumnDimensions(new int[] { 10 });
             InitTestSPInstance();
@@ -3142,7 +3146,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testInit(PoolerMode poolerMode)
         {
-            setupParameters();
+            SetupParameters();
             parameters.setNumActiveColumnsPerInhArea(0);
             parameters.setLocalAreaDensity(0);
 
@@ -3246,7 +3250,7 @@ namespace UnitTestsProject
         [TestCategory("Prod")]
         public void testComputeInputMismatch()
         {
-            setupParameters();
+            SetupParameters();
             parameters.Set(KEY.INPUT_DIMENSIONS, new int[] { 2, 4 });
             parameters.setColumnDimensions(new int[] { 5, 1 });
 

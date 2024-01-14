@@ -1,5 +1,4 @@
-﻿using NeoCortex;
-using NeoCortexApi.Utility;
+﻿using NeoCortexApi;
 using NeoCortexApi.Encoders;
 using NeoCortexApi;
 using System;
@@ -25,8 +24,8 @@ namespace NeoCortexApiSample
         {
             //
             // Starts experiment that demonstrates how to learn spatial patterns.
-            //SpatialPatternLearning experiment = new SpatialPatternLearning();
-            //experiment.Run();
+            SpatialPatternLearning experiment = new SpatialPatternLearning();
+            experiment.Run();
 
             //
             // Starts experiment that demonstrates how to learn spatial patterns.
@@ -236,10 +235,16 @@ namespace NeoCortexApiSample
             //
             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
-            var predictor = experiment.Run(sequences);         
+            var predictor = experiment.Run(sequences);
         }
 
 
+        /// <summary>
+        /// This example demonstrates how to learn two sequences and how to use the prediction mechanism.
+        /// First, two sequences are learned.
+        /// Second, three short sequences with three elements each are created und used for prediction. The predictor used by experiment privides to the HTM every element of every predicting sequence.
+        /// The predictor tries to predict the next element.
+        /// </summary>
         private static void RunMultiSequenceLearningExperiment()
         {
             Dictionary<string, List<double>> sequences = new Dictionary<string, List<double>>();

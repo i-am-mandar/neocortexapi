@@ -16,10 +16,8 @@ namespace NeoCortexApi.Entities
     /// Contains the definition of the interconnected structural state of the SpatialPooler and
     /// TemporalMemory as well as the state of Cells, Columns, Segments, Synapses etc..
     /// </summary>
-    public class Connections
+    public class Connections : ISerializable
     {
-
-        public static readonly double EPSILON = 0.00001;
 
         //Internal state
         private double version = 1.0;
@@ -46,6 +44,8 @@ namespace NeoCortexApi.Entities
         /// </summary>
         private double[] m_TieBreaker;
 
+        private AbstractSparseMatrix<Column> memory;
+
         /// <summary>
         /// The cells currently active as a result of the TM compute.
         /// </summary>
@@ -62,6 +62,12 @@ namespace NeoCortexApi.Entities
         /// All cells. Initialized during initialization of the TemporalMemory.
         /// </summary>
         public Cell[] Cells { get; set; }
+
+        /// <summary>
+        /// The main data structure containing columns, cells, and synapses.
+        /// </summary>
+        public AbstractSparseMatrix<Column> Memory { get => memory; set { memory = value; this.HtmConfig.ColumnModuleTopology = value?.ModuleTopology; } }
+
 
         private double[] m_BoostFactors;
 
@@ -164,6 +170,8 @@ namespace NeoCortexApi.Entities
 
         #region General Methods
 
+
+
         /// <summary>
         /// Returns the <see cref="Cell"/> specified by the index passed in.
         /// </summary>
@@ -189,20 +197,20 @@ namespace NeoCortexApi.Entities
             return retVal;
         }
 
-        /// <summary>
-        /// Returns a <see cref="LinkedHashSet{T}"/> containing the <see cref="Cell"/>s specified by the passed in indexes.
-        /// </summary>
-        /// <param name="cellIndexes">indexes of the Cells to return</param>
-        /// <returns></returns>
-        public List<Cell> GetCellSet(int[] cellIndexes)
-        {
-            List<Cell> retVal = new List<Cell>();
-            for (int i = 0; i < cellIndexes.Length; i++)
-            {
-                retVal.Add(Cells[cellIndexes[i]]);
-            }
-            return retVal;
-        }
+        ///// <summary>
+        ///// Returns a <see cref="LinkedHashSet{T}"/> containing the <see cref="Cell"/>s specified by the passed in indexes.
+        ///// </summary>
+        ///// <param name="cellIndexes">indexes of the Cells to return</param>
+        ///// <returns></returns>
+        //public List<Cell> GetCellSet(int[] cellIndexes)
+        //{
+        //    List<Cell> retVal = new List<Cell>();
+        //    for (int i = 0; i < cellIndexes.Length; i++)
+        //    {
+        //        retVal.Add(Cells[cellIndexes[i]]);
+        //    }
+        //    return retVal;
+        //}
 
 
         /// <summary>
@@ -214,7 +222,7 @@ namespace NeoCortexApi.Entities
         {
             foreach (int idx in matrix.GetSparseIndices())
             {
-                this.HtmConfig.Memory.GetObject(idx).SetPermanences(this.HtmConfig, matrix.GetObject(idx));
+                this.Memory.GetObject(idx).SetPermanences(this.HtmConfig, matrix.GetObject(idx));
             }
         }
 
@@ -315,20 +323,20 @@ namespace NeoCortexApi.Entities
         /// <summary>
         /// Computes the number of active and potential synapses of the each segment for a given input.
         /// </summary>
-        /// <param name="activeCellsFromPrevCycle">Cells that are currentlly spiking as calculated in the previous cycle.</param>
+        /// <param name="currentllyActiveCells">Cells that are currentlly spiking as calculated in the previous cycle.</param>
         /// <param name="connectedPermanence"></param>
         /// <returns></returns>
-        public static SegmentActivity ComputeActivity(ICollection<Cell> activeCellsFromPrevCycle, double connectedPermanence)
+        public static SegmentActivity ComputeActivity(ICollection<Cell> currentllyActiveCells, double connectedPermanence)
         {
             Dictionary<int, int> numOfActiveSynapses = new Dictionary<int, int>();
             Dictionary<int, int> numOfPotentialSynapses = new Dictionary<int, int>();
 
-            double threshold = connectedPermanence - EPSILON;
+            double threshold = connectedPermanence - HtmConfig.EPSILON;
 
             //
             // Step through all currently active cells.
             // Find synapses that points to each active cell (receptor synapses).
-            foreach (Cell activeCell in activeCellsFromPrevCycle)
+            foreach (Cell activeCell in currentllyActiveCells)
             {
                 //
                 // This cell is the active in the current cycle. 
@@ -452,9 +460,9 @@ namespace NeoCortexApi.Entities
                 {
                     //getSynapses(segment).stream().forEach(s->removeSynapseFromPresynapticMap(s));
                     //DD foreach (var s in GetSynapses(segment))
-                    foreach (var s in segment.Synapses)
+                    foreach (var syn in segment.Synapses)
                     {
-                        RemoveSynapseFromPresynapticMap(s);
+                        RemoveSynapseFromPresynapticMap(syn);
                     }
 
                     m_NumSynapses -= len;
@@ -483,8 +491,6 @@ namespace NeoCortexApi.Entities
         /// <returns>the least recently activated segment on the specified cell.</returns>
         private DistalDendrite LeastRecentlyUsedSegment(Cell cell)
         {
-            //DD
-            //List<DistalDendrite> segments = GetSegments(cell, false);
             List<DistalDendrite> segments = cell.DistalDendrites;
 
             DistalDendrite minSegment = null;
@@ -502,19 +508,6 @@ namespace NeoCortexApi.Entities
             return minSegment;
         }
 
-        ///**
-        // * Returns the total number of {@link DistalDendrite}s
-        // * 
-        // * @return  the total number of segments
-        // */
-        ///// <summary>
-        ///// 
-        ///// </summary>
-        ///// <returns></returns>
-        //public int NumSegments()
-        //{
-        //    return NumSegments(null);
-        //}
 
         /// <summary>
         /// Returns the number of <see cref="DistalDendrite"/>s on a given <see cref="Cell"/> if specified, or the total number if the <see cref="Cell"/> is null.
@@ -709,7 +702,7 @@ namespace NeoCortexApi.Entities
 
             foreach (Synapse synapse in synapses)
             {
-                if (!synapse.IsDestroyed && synapse.Permanence < minPermanence - EPSILON)
+                if (!synapse.IsDestroyed && synapse.Permanence < minPermanence - HtmConfig.EPSILON)
                 {
                     min = synapse;
                     minPermanence = synapse.Permanence;
@@ -849,7 +842,7 @@ namespace NeoCortexApi.Entities
         /// <returns></returns>
         public Column GetColumn(int index)
         {
-            return this.HtmConfig.Memory.GetObject(index);
+            return this.Memory.GetObject(index);
         }
 
         /// <summary>
@@ -870,14 +863,40 @@ namespace NeoCortexApi.Entities
 
 
         /// <summary>
-        /// Traces permanences of all columns.
+        /// Traces permanences of all mini-columns.
         /// </summary>
-        public void TraceColumnPermanences()
+        public void TraceColumnPermanences(string fileName)
         {
+            using (var sw = new StreamWriter(fileName, false))
+            {
+                foreach (var col in GetColumns())
+                {
+                    sw.WriteLine(col.TraceProximalSegment());
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Get permanences of all columns.
+        /// </summary>
+        public List<List<double>> GetColumnPermanences()
+        {
+            List<List<double>> allColPerms = new List<List<double>>();
+
             foreach (var col in GetColumns())
             {
-                col.Trace();
+                List<double> perms = new List<double>();
+
+                foreach (var syn in col.ProximalDendrite.Synapses)
+                {
+                    perms.Add(syn.Permanence);
+                }
+
+                allColPerms.Add(perms);
             }
+
+            return allColPerms;
         }
 
 
@@ -953,7 +972,7 @@ namespace NeoCortexApi.Entities
             LinkedHashSet<Column> retVal = new LinkedHashSet<Column>();
             for (int i = 0; i < indexes.Length; i++)
             {
-                retVal.Add(this.HtmConfig.Memory.GetObject(indexes[i]));
+                retVal.Add(this.Memory.GetObject(indexes[i]));
             }
             return retVal;
         }
@@ -968,7 +987,7 @@ namespace NeoCortexApi.Entities
             List<Column> retVal = new List<Column>();
             for (int i = 0; i < indexes.Length; i++)
             {
-                retVal.Add(this.HtmConfig.Memory.GetObject(indexes[i]));
+                retVal.Add(this.Memory.GetObject(indexes[i]));
             }
             return retVal;
         }
@@ -1008,7 +1027,7 @@ namespace NeoCortexApi.Entities
                 cnt++;
             }
 
-            stats.AvgPermanence= permAvgSum/cnt;
+            stats.AvgPermanence = permAvgSum / cnt;
             stats.MaxPermanence = max;
             stats.MinPermanence = min;
             stats.SynapticActivity = (double)stats.ConnectedSynapses / (double)stats.Synapses;
@@ -1016,7 +1035,7 @@ namespace NeoCortexApi.Entities
             return stats;
         }
         #endregion
-      
+
         /// <summary>
         /// Used for debugging.
         /// </summary>
@@ -1128,11 +1147,15 @@ namespace NeoCortexApi.Entities
             int result = 1;
             result = prime * result + this.HtmConfig.ActivationThreshold;
             result = prime * result + ((m_ActiveCells == null) ? 0 : m_ActiveCells.GetHashCode());
-            result = prime * result + this.HtmConfig.ActiveDutyCycles.GetHashCode();
-            result = prime * result + m_BoostFactors.GetHashCode();
-            result = prime * result + Cells.GetHashCode();
+            if (this.HtmConfig.ActiveDutyCycles != null)
+                result = prime * result + this.HtmConfig.ActiveDutyCycles.GetHashCode();
+            if (this.m_BoostFactors != null)
+                result = prime * result + m_BoostFactors.GetHashCode();
+            if (this.Cells != null)
+                result = prime * result + Cells.GetHashCode();
             result = prime * result + this.HtmConfig.CellsPerColumn;
-            result = prime * result + this.HtmConfig.ColumnDimensions.GetHashCode();
+            if (this.HtmConfig.ColumnDimensions != null)
+                result = prime * result + this.HtmConfig.ColumnDimensions.GetHashCode();
             //result = prime * result + ((connectedCounts == null) ? 0 : connectedCounts.GetHashCode());
             long temp;
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.ConnectedPermanence);
@@ -1144,7 +1167,8 @@ namespace NeoCortexApi.Entities
             result = prime * result + (int)(temp ^ (temp >> 32));
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.InitialPermanence);
             result = prime * result + (int)(temp ^ (temp >> 32));
-            result = prime * result + this.HtmConfig.InputDimensions.GetHashCode();
+            if (this.HtmConfig.InputDimensions != null)
+                result = prime * result + this.HtmConfig.InputDimensions.GetHashCode();
             result = prime * result + ((this.HtmConfig.InputMatrix == null) ? 0 : this.HtmConfig.InputMatrix.GetHashCode());
             result = prime * result + SpIterationLearnNum;
             result = prime * result + SpIterationNum;
@@ -1156,9 +1180,11 @@ namespace NeoCortexApi.Entities
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.MaxBoost);
             result = prime * result + (int)(temp ^ (temp >> 32));
             result = prime * result + this.HtmConfig.MaxNewSynapseCount;
-            result = prime * result + ((this.HtmConfig.Memory == null) ? 0 : this.HtmConfig.Memory.GetHashCode());
-            result = prime * result + this.HtmConfig.MinActiveDutyCycles.GetHashCode();
-            result = prime * result + this.HtmConfig.MinOverlapDutyCycles.GetHashCode();
+            result = prime * result + ((this.Memory == null) ? 0 : this.Memory.GetHashCode());
+            if (this.HtmConfig.MinActiveDutyCycles != null)
+                result = prime * result + this.HtmConfig.MinActiveDutyCycles.GetHashCode();
+            if (this.HtmConfig.MinOverlapDutyCycles != null)
+                result = prime * result + this.HtmConfig.MinOverlapDutyCycles.GetHashCode();
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.MinPctActiveDutyCycles);
             result = prime * result + (int)(temp ^ (temp >> 32));
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.MinPctOverlapDutyCycles);
@@ -1170,7 +1196,8 @@ namespace NeoCortexApi.Entities
             result = prime * result + this.HtmConfig.NumInputs;
             temp = m_NumSynapses;
             result = prime * result + (int)(temp ^ (temp >> 32));
-            result = prime * result + this.HtmConfig.OverlapDutyCycles.GetHashCode();
+            if (this.HtmConfig.OverlapDutyCycles != null)
+                result = prime * result + this.HtmConfig.OverlapDutyCycles.GetHashCode();
             temp = this.HtmConfig.PermanenceDecrement.GetHashCode();
             result = prime * result + (int)(temp ^ (temp >> 32));
             temp = BitConverter.DoubleToInt64Bits(this.HtmConfig.PermanenceIncrement);
@@ -1205,7 +1232,10 @@ namespace NeoCortexApi.Entities
             //result = prime * result + proximalSynapseCounter;
             //result = prime * result + ((proximalSynapses == null) ? 0 : proximalSynapses.GetHashCode());
             //DD result = prime * result + ((m_DistalSynapses == null) ? 0 : m_DistalSynapses.GetHashCode());
-            result = prime * result + m_TieBreaker.GetHashCode();
+
+            if (m_TieBreaker != null)
+                result = prime * result + m_TieBreaker.GetHashCode();
+
             result = prime * result + this.HtmConfig.UpdatePeriod;
             temp = BitConverter.DoubleToInt64Bits(version);
             result = prime * result + (int)(temp ^ (temp >> 32));
@@ -1250,10 +1280,148 @@ namespace NeoCortexApi.Entities
             Debug.WriteLine($"Max: {inputPotential.Max()} - Min: {inputPotential.Min()}, AVG: {inputPotential.Average()}");
         }
 
+        public bool Equals(Connections obj)
+        {
+            if (this == obj)
+                return true;
+            if (obj == null)
+                return false;
+            if (AreCollectionsEqual(this.WinnerCells, obj.WinnerCells) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.winnerCells, obj.winnerCells) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.ActiveCells, obj.ActiveCells) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.m_ActiveCells, obj.m_ActiveCells) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.ActiveSegments, obj.ActiveSegments) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.m_ActiveSegments, obj.m_ActiveSegments) == false)
+            {
+                return false;
+            }
+
+            if (this.BoostedOverlaps.TryIfSequenceEqual(obj.BoostedOverlaps) == false)
+            {
+                return false;
+            }
+            if (this.m_BoostedmOverlaps.TryIfSequenceEqual(obj.m_BoostedmOverlaps) == false)
+            {
+                return false;
+            }
+            //if (AreCollectionsEqual(this.Cells, obj.Cells) == false)
+            //{
+            //    return false;
+            //}
+            if (this.BoostFactors.TryIfSequenceEqual(obj.BoostFactors) == false)
+            {
+                return false;
+            }
+            if (this.m_BoostFactors.TryIfSequenceEqual(obj.m_BoostFactors) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.MatchingSegments, obj.MatchingSegments) == false)
+            {
+                return false;
+            }
+            if (AreCollectionsEqual(this.m_MatchingSegments, obj.m_MatchingSegments) == false)
+            {
+                return false;
+            }
+            if (this.m_FreeFlatIdxs.TryIfSequenceEqual(obj.m_FreeFlatIdxs) == false)
+            {
+                return false;
+            }
+
+            if (this.HtmConfig.Equals(obj.HtmConfig) == false)
+                return false;
+            if (this.m_HtmConfig.Equals(obj.m_HtmConfig) == false)
+                return false;
+
+            if (this.Memory == null)
+            {
+                if (obj.Memory != null)
+                    return false;
+            }
+            else if (this.Memory.Equals(obj.Memory) == false)
+                return false;
+            if (this.memory == null)
+            {
+                if (obj.memory != null)
+                    return false;
+            }
+            else if (this.memory.Equals(obj.memory) == false)
+                return false;
+
+            if (this.m_NextFlatIdx != obj.m_NextFlatIdx)
+                return false;
+
+            if (this.m_NextSegmentOrdinal.Equals(obj.m_NextSegmentOrdinal) == false)
+                return false;
+            if (this.m_NextSynapseOrdinal.Equals(obj.m_NextSynapseOrdinal) == false)
+                return false;
+            if (this.m_NumSynapses != obj.m_NumSynapses)
+                return false;
+            if (this.m_Overlaps.TryIfSequenceEqual(obj.m_Overlaps) == false)
+                return false;
+            if (this.Overlaps.TryIfSequenceEqual(obj.Overlaps) == false)
+                return false;
+            if (AreCollectionsEqual(this.m_PredictiveCells, obj.m_PredictiveCells) == false)
+                return false;
+            if (this.m_SegmentForFlatIdx.KeyValuesEqual(obj.m_SegmentForFlatIdx) == false)
+                return false;
+            if (this.m_TieBreaker.TryIfSequenceEqual(obj.m_TieBreaker) == false)
+                return false;
+            if (this.TieBreaker.TryIfSequenceEqual(obj.TieBreaker) == false)
+                return false;
+            if (this.m_TMIteration != obj.m_TMIteration)
+                return false;
+            if (this.NextSegmentOrdinal != obj.NextSegmentOrdinal)
+                return false;
+            if (this.SpIterationLearnNum != obj.SpIterationLearnNum)
+                return false;
+            if (this.SpIterationNum != obj.SpIterationNum)
+                return false;
+            if (this.version != obj.version)
+                return false;
+
+            return true;
+
+        }
+
+        private static bool AreCollectionsEqual<T>(IEnumerable<T> current, IEnumerable<T> target)
+        {
+            if (current == null && target != null ||
+                current != null && target == null)
+            {
+                return false;
+            }
+            else if (current == null && target == null)
+                return true;
+            else if (current.Count() == 0)
+                return target.Count() == 0;
+            else if (current.ElementsEqual(target) == false)
+            {
+                return false;
+            }
+            return true;
+        }
+
         #region Serialization
         public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(Connections), writer);
 
@@ -1279,7 +1447,7 @@ namespace NeoCortexApi.Entities
             ser.SerializeValue(this.ActiveSegments, writer);
             ser.SerializeValue(this.MatchingSegments, writer);
             ser.SerializeValue(this.m_SegmentForFlatIdx, writer);
-            ser.SerializeValue(this.Cells, writer);
+            //ser.SerializeValue(this.Cells, writer);
             if (this.ActiveCells != null)
             {
                 //this.ActiveCells.Serialize(writer);
@@ -1317,7 +1485,7 @@ namespace NeoCortexApi.Entities
         public static Connections Deserialize(StreamReader sr)
         {
             Connections mem = new Connections();
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
@@ -1326,10 +1494,10 @@ namespace NeoCortexApi.Entities
                 {
                     continue;
                 }
-                else if (data == ser.ReadBegin("CellArray"))
-                {
-                    mem.Cells = ser.DeserializeCellArray(data, sr);
-                }
+                //else if (data == ser.ReadBegin("CellArray"))
+                //{
+                //    mem.Cells = ser.DeserializeCellArray(data, sr);
+                //}
                 else if (data == ser.ReadBegin(nameof(DistalDendrite)))
                 {
                     //mem.m_ActiveSegments.Add(DistalDendrite.Deserialize(sr));
@@ -1351,7 +1519,7 @@ namespace NeoCortexApi.Entities
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
@@ -1451,6 +1619,154 @@ namespace NeoCortexApi.Entities
 
             return mem;
 
+        }
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            if (obj is Connections connections)
+            {
+
+                var ignoreMembers = new List<string>
+                {
+                    nameof(Connections.m_ActiveCells),
+                    nameof(Connections.winnerCells),
+                    nameof(Connections.memory),
+                    nameof(Connections.m_HtmConfig),
+                    nameof(Connections.m_TieBreaker),
+                    nameof(Connections.m_BoostedmOverlaps),
+                    nameof(Connections.m_Overlaps),
+                    nameof(Connections.m_BoostFactors),
+                    nameof(Connections.m_ActiveSegments),
+                    nameof(Connections.m_MatchingSegments),
+                    nameof(Connections.ActiveCells),
+                    nameof(Connections.WinnerCells),
+                    nameof(Connections.m_SegmentForFlatIdx),
+                    nameof(Connections.Cells),
+                    nameof(Connections.m_PredictiveCells)
+
+                    //nameof(Connections.Cells)
+                };
+                HtmSerializer.SerializeObject(connections, name, sw, ignoreMembers);
+                var cells = connections.GetColumns().SelectMany(c => c.Cells).ToList();
+                HtmSerializer.Serialize(cells, "cellsList", sw);
+
+                var ddSynapses = cells.SelectMany(c => c.DistalDendrites).SelectMany(dd => dd.Synapses).ToList();
+                var cellSynapses = cells.SelectMany(c => c.ReceptorSynapses).ToList();
+                var synapses = ddSynapses.Union(cellSynapses).ToList();
+
+                HtmSerializer.Serialize(synapses, "synapsesList", sw);
+
+                var activeCellIds = connections.ActiveCells.Select(c => c.Index).ToList();
+                HtmSerializer.Serialize(activeCellIds, "activeCellIds", sw);
+
+                var winnerCellIds = connections.WinnerCells.Select(c => c.Index).ToList();
+                HtmSerializer.Serialize(winnerCellIds, "winnerCellIds", sw);
+
+                var predictiveCellIds = connections.m_PredictiveCells.Select(c => c.Index).ToList();
+                HtmSerializer.Serialize(predictiveCellIds, "predictiveCellIds", sw);
+            }
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            var ignoreMembers = new List<string>
+            {
+                "activeCellIds",
+                "winnerCellIds",
+                "synapsesList",
+                "cellsList",
+                "predictiveCellIds"
+            };
+            var cells = new List<Cell>();
+            var conn = HtmSerializer.DeserializeObject<Connections>(sr, name, ignoreMembers, (conn, propName) =>
+            {
+                if (propName == "cellsList")
+                {
+                    cells = HtmSerializer.Deserialize<List<Cell>>(sr, "cellsList");
+                }
+                else if (propName == "activeCellIds")
+                {
+                    var activeCellIds = HtmSerializer.Deserialize<List<int>>(sr, "activeCellIds");
+                    foreach (var cellId in activeCellIds)
+                    {
+                        var cell = cells.FirstOrDefault(c => c.Index == cellId);
+                        if (cell != null)
+                            conn.ActiveCells.Add(cell);
+                    }
+                }
+                else if (propName == "winnerCellIds")
+                {
+                    var winnerCellIds = HtmSerializer.Deserialize<List<int>>(sr, "winnerCellIds");
+                    foreach (var cellId in winnerCellIds)
+                    {
+                        var cell = cells.FirstOrDefault(c => c.Index == cellId);
+                        if (cell != null)
+                            conn.WinnerCells.Add(cell);
+                    }
+                }
+                else if (propName == "predictiveCellIds")
+                {
+                    var predictiveCellIds = HtmSerializer.Deserialize<List<int>>(sr, "predictiveCellIds");
+                    foreach (var cellId in predictiveCellIds)
+                    {
+                        var cell = cells.FirstOrDefault(c => c.Index == cellId);
+                        if (cell != null)
+                            conn.m_PredictiveCells.Add(cell);
+                    }
+                }
+                else if (propName == "synapsesList")
+                {
+                    var synapses = HtmSerializer.Deserialize<List<Synapse>>(sr, "synapsesList");
+                    foreach (var synapse in synapses)
+                    {
+                        synapse.SourceCell = cells.FirstOrDefault(c => c.Index == synapse.InputIndex);
+                    }
+
+                    foreach (var cell in cells)
+                    {
+                        cell.ReceptorSynapses = synapses.Where(s => s.InputIndex == cell.Index).ToList();
+
+                        foreach (var distalDendrite in cell.DistalDendrites)
+                        {
+                            distalDendrite.Synapses = synapses.Where(s => s.SegmentIndex == distalDendrite.SegmentIndex).ToList();
+                        }
+                    }
+
+                    if (conn.Memory != null)
+                    {
+
+                        var columnIndexes = conn.Memory.GetSparseIndices();
+
+                        var columns = new List<Column>();
+
+                        foreach (var index in columnIndexes)
+                        {
+                            var col = conn.Memory.GetColumn(index);
+                            if (col != null)
+                                columns.Add(col);
+                        }
+                        foreach (var column in columns)
+                        {
+                            column.Cells = cells.Where(c => c.ParentColumnIndex == column.Index).ToArray();
+                        }
+
+                        var distalDendrites = cells.SelectMany(c => c.DistalDendrites).Distinct().OrderBy(dd => dd.SegmentIndex);
+                        conn.m_SegmentForFlatIdx = new ConcurrentDictionary<int, DistalDendrite>();
+                        foreach (var distalDendrite in distalDendrites)
+                        {
+                            conn.m_SegmentForFlatIdx.TryAdd(distalDendrite.SegmentIndex, distalDendrite);
+                        }
+                    }
+                }
+            });
+
+            //var cells = new List<Cell>();
+            //for (int i = 0; i < conn.Memory.GetMaxIndex(); i++)
+            //{
+            //    cells.AddRange(conn.memory.GetColumn(i).Cells);
+            //}
+            //conn.Cells = cells.ToArray();
+            return conn;
         }
         #endregion
 

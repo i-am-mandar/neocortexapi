@@ -13,7 +13,7 @@ namespace NeoCortexApi.Entities
     /// <summary>
     /// Implementation of the mini-column.
     /// </summary>
-    public class Column : IEquatable<Column>, IComparable<Column>
+    public class Column : IEquatable<Column>, IComparable<Column>, ISerializable
     {
         public AbstractSparseBinaryMatrix connectedInputCounter;
 
@@ -48,15 +48,6 @@ namespace NeoCortexApi.Entities
         /// </summary>
         public Cell[] Cells { get; set; }
 
-        /// <summary>
-        /// CellId
-        /// </summary>
-        public int CellId { get; set; }
-
-        //private ReadOnlyCollection<Cell> cellList;
-
-        private readonly int hashcode;
-
         public Column()
         {
 
@@ -73,13 +64,11 @@ namespace NeoCortexApi.Entities
         {
             this.Index = colIndx;
 
-            this.hashcode = GetHashCode();
-
             Cells = new Cell[numCells];
 
             for (int i = 0; i < numCells; i++)
             {
-                Cells[i] = new Cell(this.Index, i, this.GetNumCellsPerColumn(), this.CellId, CellActivity.ActiveCell);
+                Cells[i] = new Cell(this.Index, i, this.GetNumCellsPerColumn(), CellActivity.ActiveCell);
             }
 
             // We keep tracking of this column only
@@ -101,7 +90,7 @@ namespace NeoCortexApi.Entities
         }
 
         /// <summary>
-        /// Returns the <see cref="Cell"/> with the least number of <see cref="DistalDendrite"/>s.
+        /// Returns the <see cref="Cell"/> with the least number of <see cref="Segment"/>s.
         /// </summary>
         /// <param name="c">the connections state of the temporal memory</param>
         /// <param name="random"></param>
@@ -230,11 +219,14 @@ namespace NeoCortexApi.Entities
         {
             if (raisePerm)
             {
-                HtmCompute.RaisePermanenceToThresholdSparse(htmConfig, perm);
+                HtmCompute.RaisePermanenceToThreshold(htmConfig, perm);
             }
 
+            // All values less than SynPermTrimThreshold will be set to zero.
             ArrayUtils.LessOrEqualXThanSetToY(perm, htmConfig.SynPermTrimThreshold, 0);
+            
             ArrayUtils.EnsureBetweenMinAndMax(perm, htmConfig.SynPermMin, htmConfig.SynPermMax);
+
             SetProximalPermanencesSparse(htmConfig, perm, maskPotential);
         }
 
@@ -242,7 +234,7 @@ namespace NeoCortexApi.Entities
         /// Trace synapse permanences.
         /// </summary>
         /// <returns></returns>
-        public string Trace()
+        public string TraceProximalSegment()
         {
             double permSum = 0.0;
 
@@ -378,6 +370,13 @@ namespace NeoCortexApi.Entities
             return m_Hashcode;
         }
 
+        public override bool Equals(object obj)
+        {
+            var col = obj as Column;
+            if (col == null)
+                return false;
+            return this.Equals(col);
+        }
         public bool Equals(Column obj)
         {
             if (this == obj)
@@ -409,13 +408,13 @@ namespace NeoCortexApi.Entities
             if (obj.Cells != null && Cells != null)
             {
 
-                if (!obj.Cells.SequenceEqual(Cells))
+                if (!obj.Cells.ElementsEqual(Cells))
                     return false;
             }
             if (Index != obj.Index)
                 return false;
-            if (CellId != obj.CellId)
-                return false;
+           // if (CellId != obj.CellId)
+              //  return false;
 
             return true;
         }
@@ -440,11 +439,11 @@ namespace NeoCortexApi.Entities
         }
         public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(Column), writer);
 
-            ser.SerializeValue(this.CellId, writer);
+            //ser.SerializeValue(this.CellId, writer);
             ser.SerializeValue(this.Index, writer);
 
 
@@ -469,7 +468,7 @@ namespace NeoCortexApi.Entities
         {
             Column column = new Column();
 
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
 
             while (!sr.EndOfStream)
@@ -501,14 +500,14 @@ namespace NeoCortexApi.Entities
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
                         {
                             case 0:
                                 {
-                                    column.CellId = ser.ReadIntValue(str[i]);
+                                   // column.CellId = ser.ReadIntValue(str[i]);
                                     break;
                                 }
                             case 1:
@@ -524,6 +523,26 @@ namespace NeoCortexApi.Entities
                 }
             }
             return column;
+        }
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            var column = obj as Column;
+            if (column != null)
+            {
+                var ignoreMembers = new List<string>
+                {
+                    nameof(Column.connectedInputCounter),
+                    nameof(Column.Cells),
+                    nameof(Column.m_Hashcode)
+                };
+                HtmSerializer.SerializeObject(column, name, sw, ignoreMembers);
+            }
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            return HtmSerializer.DeserializeObject<Column>(sr, name);
         }
     }
 }

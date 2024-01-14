@@ -13,7 +13,7 @@ namespace NeoCortexApi.Entities
     /// Defines th eproximal dentritte segment. Note the segment is used during SP compute operation.
     /// TM does not use this segment.
     /// </summary>
-    public class ProximalDendrite : Segment
+    public class ProximalDendrite : Segment, ISerializable
     {
         /// <summary>
         /// The pool of synapses in the receptive field.
@@ -26,7 +26,7 @@ namespace NeoCortexApi.Entities
         /// <param name="colIndx">The global index of the segment.</param>
         /// <param name="synapsePermConnected">Permanence threshold value to declare synapse as connected.</param>
         /// <param name="numInputs">Number of input neorn cells.</param>
-        public ProximalDendrite(int colIndx, double synapsePermConnected, int numInputs) : base(colIndx, synapsePermConnected, numInputs)
+        public ProximalDendrite(int colIndx, double synapsePermConnected, int numInputs) : base(colIndx, -1, synapsePermConnected, numInputs)
         {
 
         }
@@ -55,7 +55,7 @@ namespace NeoCortexApi.Entities
             return synapse;
         }
 
-        
+
 
         /// <summary>
         /// Array of indicies of connected inputs. Defines RF. Sometimes also called 'Potential Pool'.
@@ -135,6 +135,19 @@ namespace NeoCortexApi.Entities
             return this.RFPool.GetSparsePotential();
         }
 
+        public override int GetHashCode()
+        {
+            var prime = 31;
+            var result = 1;
+
+            result = prime * result + this.SegmentIndex;
+            result = prime * result + this.NumInputs;
+            result = prime * result + ((RFPool == null) ? 0 : RFPool.GetHashCode());
+            result = prime * result + ((ConnectedInputs == null) ? 0 : ConnectedInputs.GetHashCode());
+
+            return result;
+        }
+
         public bool Equals(ProximalDendrite obj)
         {
             if (this == obj)
@@ -160,8 +173,8 @@ namespace NeoCortexApi.Entities
                 if (other.Synapses != null)
                     return false;
             }
-            else if (!Synapses.SequenceEqual(other.Synapses))
-                    return false;
+            else if (!Synapses.ElementsEqual(other.Synapses))
+                return false;
 
             //if (boxedIndex == null)
             //{
@@ -175,13 +188,13 @@ namespace NeoCortexApi.Entities
                 return false;
             if (NumInputs != other.NumInputs)
                 return false;
-            
+
             return true;
         }
         #region Serialization
-        public override void Serialize(StreamWriter writer)
+        public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(ProximalDendrite), writer);
 
@@ -199,7 +212,7 @@ namespace NeoCortexApi.Entities
             //    this.boxedIndex.Serialize(writer);
             //}
             ser.SerializeValue(this.Synapses, writer);
-            
+
             ser.SerializeEnd(nameof(ProximalDendrite), writer);
         }
 
@@ -207,12 +220,12 @@ namespace NeoCortexApi.Entities
         {
             ProximalDendrite proximal = new ProximalDendrite();
 
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
                 string data = sr.ReadLine();
-                if (data == String.Empty || data == ser.ReadBegin(nameof(ProximalDendrite)) || (data.ToCharArray()[0] == HtmSerializer2.ElementsDelimiter && data.ToCharArray()[1] == HtmSerializer2.ParameterDelimiter) || data.ToCharArray()[1] == HtmSerializer2.ParameterDelimiter)
+                if (data == String.Empty || data == ser.ReadBegin(nameof(ProximalDendrite)) || (data.ToCharArray()[0] == HtmSerializer.ElementsDelimiter && data.ToCharArray()[1] == HtmSerializer.ParameterDelimiter) || data.ToCharArray()[1] == HtmSerializer.ParameterDelimiter)
                 {
                     continue;
                 }
@@ -234,7 +247,7 @@ namespace NeoCortexApi.Entities
                 }
                 else
                 {
-                    string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                    string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                     for (int i = 0; i < str.Length; i++)
                     {
                         switch (i)
@@ -259,6 +272,29 @@ namespace NeoCortexApi.Entities
 
                         }
                     }
+                }
+            }
+            return proximal;
+        }
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            var ignoreMembers = new List<string>
+            {
+                nameof(Segment.Synapses)
+            };
+            HtmSerializer.SerializeObject(obj, name, sw, ignoreMembers);
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            var proximal = HtmSerializer.DeserializeObject<ProximalDendrite>(sr, name);
+            if (proximal.RFPool != null)
+            {
+                proximal.Synapses = proximal.RFPool?.m_SynapsesBySourceIndex.Select(kv => kv.Value).ToList();
+                foreach (var synapse in proximal.Synapses)
+                {
+                    synapse.SegmentIndex = proximal.SegmentIndex;
                 }
             }
             return proximal;

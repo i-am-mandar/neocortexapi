@@ -1,9 +1,11 @@
 ﻿// Copyright (c) Damir Dobric. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 
 namespace NeoCortexApi.Entities
@@ -12,8 +14,10 @@ namespace NeoCortexApi.Entities
     /// HTM configuration.
     /// Also sent from Akka-client to Akka Actor.
     /// </summary>
-    public class HtmConfig
+    public class HtmConfig : ISerializable
     {
+        public static readonly double EPSILON = 0.00001;
+
         /// <summary>
         /// Default constructor with the default set of parameters.
         /// </summary>
@@ -45,7 +49,7 @@ namespace NeoCortexApi.Entities
 
         private double synPermActiveInc;
         private double synPermConnected;
-        private AbstractSparseMatrix<Column> memory;
+        
         private ISparseMatrix<int> inputMatrix;
 
         public TemporalMemoryConfig TemporalMemory { get; set; } = new TemporalMemoryConfig();
@@ -95,7 +99,7 @@ namespace NeoCortexApi.Entities
         public double PotentialPct { get; set; }
 
         /// <summary>
-        /// Minimum number of connected synapses (mini-columns with active synapses) to the input to declare the mini-column active. 
+        /// Minimum number of connected synapses (mini-columns with connected synapses) to the input to declare the mini-column active. 
         /// </summary>
         public double StimulusThreshold { get; set; }
 
@@ -119,6 +123,13 @@ namespace NeoCortexApi.Entities
         /// a "connected synapse", meaning it can contribute to the cell's firing.
         /// </summary>
         public double SynPermConnected { get => synPermConnected; set { synPermConnected = value; SynPermBelowStimulusInc = value / 10.0; } }
+
+        /// <summary>
+        /// If the permanence value for a synapse is greater than this value, it is said to be connected = the potential synapse.
+        /// Synapses that exceeds this value are used in computation of active segments.
+        /// </summary>
+        [Obsolete("Use SynPermConnected instead.")]
+        public double ConnectedPermanence { get; set; } = 0.5;
 
         /// <summary>
         /// Specifies whether neighborhoods wider than the borders wrap around to the other side.
@@ -299,12 +310,16 @@ namespace NeoCortexApi.Entities
         public int MaxSynapsesPerSegment { get; set; }
 
         /// <summary>
-        /// Amount by which permanences of synapses are incremented during learning.
+        /// Amount by which permanences of synapses are incremented during learning.This value is related to AMPA.
+        /// AMPA (α-amino-3-hydroxy-5-methyl-4-isoxazolepropionic acid) receptors are a type of 
+        /// ionotropic glutamate receptor that plays a key role in both long-term potentiation (LTP) 
+        /// and short-term potentiation (STP) at excitatory synapses in the brain.
         /// </summary>
         public double PermanenceIncrement { get; set; }
 
         /// <summary>
         /// Amount by which permanences of synapses are decremented during learning.
+        /// <seealso cref="PermanenceIncrement"/>
         /// </summary>
         public double PermanenceDecrement { get; set; }
 
@@ -317,11 +332,6 @@ namespace NeoCortexApi.Entities
         /// The topology of the input.
         /// </summary>
         public HtmModuleTopology InputModuleTopology { get; set; }
-
-        /// <summary>
-        /// The main data structure containing columns, cells, and synapses.
-        /// </summary>
-        public AbstractSparseMatrix<Column> Memory { get => memory; set { memory = value; ColumnModuleTopology = value?.ModuleTopology; } }
 
         /// <summary>
         /// Activation threshold used in sequence learning. If the number of active connected synapses on a distal segment is at least this threshold, the segment is declared as active one.
@@ -344,12 +354,6 @@ namespace NeoCortexApi.Entities
         /// Initial permanence of a new synapse
         /// </summary>
         public double InitialPermanence { get; set; } = 0.21;
-
-        /// <summary>
-        /// If the permanence value for a synapse is greater than this value, it is said to be connected = the potential synapse.
-        /// Synapses that exceeds this value are used in computation of active segments.
-        /// </summary>
-        public double ConnectedPermanence { get; set; } = 0.5;
 
         //public bool Learn { get; set; } = true;
         #endregion
@@ -417,7 +421,6 @@ namespace NeoCortexApi.Entities
 
         public void ClearModuleTopology()
         {
-            this.Memory = null;
             this.InputMatrix = null;
         }
         public bool Equals(HtmConfig obj)
@@ -427,13 +430,13 @@ namespace NeoCortexApi.Entities
             if (obj == null)
                 return false;
 
-            if (memory == null)
-            {
-                if (obj.memory != null)
-                    return false;
-            }
-            else if (!memory.Equals(obj.memory))
-                return false;
+            //if (memory == null)
+            //{
+            //    if (obj.memory != null)
+            //        return false;
+            //}
+            //else if (!memory.Equals(obj.memory))
+            //    return false;
             if (inputMatrix == null)
             {
                 if (obj.inputMatrix != null)
@@ -476,13 +479,13 @@ namespace NeoCortexApi.Entities
             }
             else if (!InputModuleTopology.Equals(obj.InputModuleTopology))
                 return false;
-            if (Memory == null)
-            {
-                if (obj.Memory != null)
-                    return false;
-            }
-            else if (!Memory.Equals(obj.Memory))
-                return false;
+            //if (Memory == null)
+            //{
+            //    if (obj.Memory != null)
+            //        return false;
+            //}
+            //else if (!Memory.Equals(obj.Memory))
+            //    return false;
             if (synPermActiveInc != obj.SynPermActiveInc)
                 return false;
             if (synPermConnected != obj.synPermConnected)
@@ -533,7 +536,7 @@ namespace NeoCortexApi.Entities
                 return false;
             if (MaxBoost != obj.MaxBoost)
                 return false;
-           
+
             if (UpdatePeriod != obj.UpdatePeriod)
                 return false;
             if (OverlapDutyCycles != null && this.OverlapDutyCycles != null)
@@ -600,8 +603,7 @@ namespace NeoCortexApi.Entities
                 return false;
             if (Random != null && obj.Random != null)
             {
-
-                if (obj.Random.Next() != Random.Next())
+                if (!obj.Random.Equals(Random))
                     return false;
             }
 
@@ -611,7 +613,7 @@ namespace NeoCortexApi.Entities
         #region Serialization
         public void Serialize(StreamWriter writer)
         {
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             ser.SerializeBegin(nameof(HtmConfig), writer);
 
@@ -619,6 +621,7 @@ namespace NeoCortexApi.Entities
             ser.SerializeValue(this.SynPermConnected, writer);
             //Spatial Pooler Variables
             //ser.SerializeValue(this.InhibitionRadius, writer);
+            ser.SerializeValue(-1, writer);
             ser.SerializeValue(this.NumInputs, writer);
             ser.SerializeValue(this.NumColumns, writer);
             ser.SerializeValue(this.PotentialRadius, writer);
@@ -642,7 +645,7 @@ namespace NeoCortexApi.Entities
             ser.SerializeValue(this.PredictedSegmentDecrement, writer);
             ser.SerializeValue(this.DutyCyclePeriod, writer);
             ser.SerializeValue(this.MaxBoost, writer);
-           
+
             ser.SerializeValue(this.UpdatePeriod, writer);
             ser.SerializeValue(this.OverlapDutyCycles, writer);
             ser.SerializeValue(this.ActiveDutyCycles, writer);
@@ -666,10 +669,10 @@ namespace NeoCortexApi.Entities
             ser.SerializeValue(this.Name, writer);
             ser.SerializeValue(this.RandomGenSeed, writer);
 
-            if (this.memory != null)
-            {
-                this.memory.Serialize(writer);
-            }
+            //if (this.memory != null)
+            //{
+            //    this.memory.Serialize(writer);
+            //}
             if (this.inputMatrix != null)
             {
                 this.inputMatrix.Serialize(writer);
@@ -695,17 +698,17 @@ namespace NeoCortexApi.Entities
             {
                 this.InputMatrix.Serialize(writer);
             }
-            if (this.Memory != null)
-            {
-                this.Memory.Serialize(writer);
-            }
+            //if (this.Memory != null)
+            //{
+            //    this.Memory.Serialize(writer);
+            //}
 
             ser.SerializeEnd(nameof(HtmConfig), writer);
         }
         public static HtmConfig Deserialize(StreamReader sr)
         {
             HtmConfig htmConfig = new HtmConfig();
-            HtmSerializer2 ser = new HtmSerializer2();
+            HtmSerializer ser = new HtmSerializer();
 
             while (sr.Peek() >= 0)
             {
@@ -730,10 +733,10 @@ namespace NeoCortexApi.Entities
                 }
                 else
                 {
-                    int count = data.Count(ch => ch == HtmSerializer2.ParameterDelimiter);
+                    int count = data.Count(ch => ch == HtmSerializer.ParameterDelimiter);
                     if (count == 20)
                     {
-                        string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                        string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                         for (int i = 0; i < str.Length; i++)
                         {
                             switch (i)
@@ -844,7 +847,7 @@ namespace NeoCortexApi.Entities
                     }
                     else
                     {
-                        string[] str = data.Split(HtmSerializer2.ParameterDelimiter);
+                        string[] str = data.Split(HtmSerializer.ParameterDelimiter);
                         for (int i = 0; i < str.Length; i++)
                         {
                             switch (i)
@@ -998,6 +1001,23 @@ namespace NeoCortexApi.Entities
 
                 }
             }
+            return htmConfig;
+        }
+
+        public void Serialize(object obj, string name, StreamWriter sw)
+        {
+            var excludeMembers = new List<string>
+            {
+                nameof(HtmConfig.inputMatrix),
+                nameof(HtmConfig.synPermActiveInc),
+                nameof(HtmConfig.synPermConnected)
+            };
+            HtmSerializer.SerializeObject(obj, name, sw, excludeMembers);
+        }
+
+        public static object Deserialize<T>(StreamReader sr, string name)
+        {
+            var htmConfig = HtmSerializer.DeserializeObject<HtmConfig>(sr, name);
             return htmConfig;
         }
         #endregion

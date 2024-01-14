@@ -30,9 +30,9 @@ namespace NeoCortexApi
 
             this.distMemConfig = distMem;
 
-            SparseObjectMatrix<Column> mem = (SparseObjectMatrix<Column>)c.HtmConfig.Memory;
+            SparseObjectMatrix<Column> mem = (SparseObjectMatrix<Column>)c.Memory;
 
-            c.HtmConfig.Memory = mem == null ? mem = new SparseObjectMatrix<Column>(c.HtmConfig.ColumnDimensions, dict: distMem.ColumnDictionary) : mem;
+            c.Memory = mem == null ? mem = new SparseObjectMatrix<Column>(c.HtmConfig.ColumnDimensions, dict: distMem.ColumnDictionary) : mem;
 
             c.HtmConfig.InputMatrix = new SparseBinaryMatrix(c.HtmConfig.InputDimensions);
 
@@ -42,7 +42,7 @@ namespace NeoCortexApi
 
             //Calculate numInputs and numColumns
             int numInputs = c.HtmConfig.InputMatrix.GetMaxIndex() + 1;
-            int numColumns = c.HtmConfig.Memory.GetMaxIndex() + 1;
+            int numColumns = c.Memory.GetMaxIndex() + 1;
             if (numColumns <= 0)
             {
                 throw new ArgumentException("Invalid number of columns: " + numColumns);
@@ -64,7 +64,7 @@ namespace NeoCortexApi
 
             //
             // Fill the sparse matrix with column objects
-            //var numCells = c.getCellsPerColumn();
+            //var _numCells = c.getCellsPerColumn();
 
             // var partitions = mem.GetPartitions();
 
@@ -72,7 +72,7 @@ namespace NeoCortexApi
             List<KeyPair> colList = new List<KeyPair>();
             for (int i = 0; i < numColumns; i++)
             {
-                //colList.Add(new KeyPair() { Key = i, Value = new Column(numCells, i, c.getSynPermConnected(), c.NumInputs) });
+                //colList.Add(new KeyPair() { Key = i, Value = new Column(_numCells, i, c.getSynPermConnected(), c.NumInputs) });
                 colList.Add(new KeyPair() { Key = i, Value = c.HtmConfig });
             }
 
@@ -205,7 +205,7 @@ namespace NeoCortexApi
             //    colList.Add(new KeyPair() { Key = i, Value = data.Column });
             //}
 
-            SparseObjectMatrix<Column> mem = (SparseObjectMatrix<Column>)c.HtmConfig.Memory;
+            SparseObjectMatrix<Column> mem = (SparseObjectMatrix<Column>)c.Memory;
 
             //if (mem.IsRemotelyDistributed)
             //{
@@ -267,13 +267,13 @@ namespace NeoCortexApi
             remoteHtm.AdaptSynapsesDist(inputVector, permChanges, activeColumns);
         }
 
-        public override void BumpUpWeakColumns(Connections c)
+        public override void BoostColsWithLowOverlap(Connections c)
         {
             IHtmDistCalculus remoteHtm = this.distMemConfig.ColumnDictionary as IHtmDistCalculus;
             if (remoteHtm == null)
                 throw new ArgumentException("disMemConfig is not of type IRemotelyDistributed!");
 
-            var weakColumns = c.HtmConfig.Memory.Get1DIndexes().Where(i => c.HtmConfig.OverlapDutyCycles[i] < c.HtmConfig.MinOverlapDutyCycles[i]).ToArray();
+            var weakColumns = c.Memory.Get1DIndexes().Where(i => c.HtmConfig.OverlapDutyCycles[i] < c.HtmConfig.MinOverlapDutyCycles[i]).ToArray();
             if (weakColumns.Length > 0)
                 remoteHtm.BumpUpWeakColumnsDist(weakColumns);
         }

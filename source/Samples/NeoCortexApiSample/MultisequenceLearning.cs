@@ -3,6 +3,7 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
+using Org.BouncyCastle.Asn1.Tsp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace NeoCortexApiSample
         /// Runs the learning of sequences.
         /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
-        public HtmPredictionEngine Run(Dictionary<string, List<double>> sequences)
+        public Predictor Run(Dictionary<string, List<double>> sequences)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
@@ -76,7 +77,7 @@ namespace NeoCortexApiSample
         /// <summary>
         ///
         /// </summary>
-        private HtmPredictionEngine RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<double>> sequences)
+        private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<double>> sequences)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -182,6 +183,9 @@ namespace NeoCortexApiSample
 
                 previousInputs.Add("-1.0");
 
+                // Set on true if the system has learned the sequence with a maximum acurracy.
+                bool isLearningCompleted = false;
+
                 //
                 // Now training with SP+TM. SP is pretrained on the given input pattern set.
                 for (int i = 0; i < maxCycles; i++)
@@ -281,6 +285,7 @@ namespace NeoCortexApiSample
                         {
                             sw.Stop();
                             Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.Key} learning time: {sw.Elapsed}.");
+                            isLearningCompleted = true;
                             break;
                         }
                     }
@@ -293,36 +298,17 @@ namespace NeoCortexApiSample
                     // This resets the learned state, so the first element starts allways from the beginning.
                     tm.Reset(mem);
                 }
+
+                if (isLearningCompleted == false)
+                    throw new Exception($"The system didn't learn with expected acurracy!");
             }
 
             Debug.WriteLine("------------ END ------------");
-
-            return new HtmPredictionEngine { Layer = layer1, Classifier = cls, Connections = mem };
+           
+            return new Predictor(layer1, mem, cls);
         }
 
-        public class HtmPredictionEngine
-        {
-            public void Reset()
-            {
-                var tm = this.Layer.HtmModules.FirstOrDefault(m => m.Value is TemporalMemory);
-                ((TemporalMemory)tm.Value).Reset(this.Connections);
-            }
-            public List<ClassifierResult<string>> Predict(double input)
-            {
-                var lyrOut = this.Layer.Compute(input, false) as ComputeCycle;
-
-                List<ClassifierResult<string>> predictedInputValues = this.Classifier.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
-
-                return predictedInputValues;
-            }
-
-            public Connections Connections { get; set; }
-
-            public CortexLayer<object, object> Layer { get; set; }
-
-            public HtmClassifier<string, ComputeCycle> Classifier { get; set; }
-        }
-
+      
         /// <summary>
         /// Gets the number of all unique inputs.
         /// </summary>
@@ -340,6 +326,7 @@ namespace NeoCortexApiSample
 
             return num;
         }
+
 
         /// <summary>
         /// Constracts the unique key of the element of an sequece. This key is used as input for HtmClassifier.
