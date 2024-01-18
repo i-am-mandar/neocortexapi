@@ -16,18 +16,32 @@ namespace MultisequenceLearning
         {
             Console.WriteLine("Starting Song Prediction experiment...");
 
-            //crating list of dataset files which contains playlist
-            List<String> playlists = new List<String>();
-            playlists.Add("playlist1.json");
-            playlists.Add("romantic_playlist.json");
-            playlists.Add("gym_playlist.json");
-            playlists.Add("sporty_playlist.json");
-            playlists.Add("energetic_playlist.json");
+            /*
+                //creating list of dataset files which contains playlist
+                List<String> playlists = new List<String>();
+                playlists.Add("playlist1.json");
+                playlists.Add("romantic_playlist.json");
+                playlists.Add("gym_playlist.json");
+                playlists.Add("sporty_playlist.json");
+                playlists.Add("energetic_playlist.json");
 
-            //reading all dataset files and creating list of playlists
-            Console.WriteLine("Reading playlists");
-            var dataFiles = HelperMethods.GetPlaylists(playlists);
-            Console.WriteLine("Reading playlists done..");
+                //reading all dataset files and creating list of playlists
+                Console.WriteLine("Reading playlists");
+                var dataFiles = HelperMethods.GetPlaylists(playlists);
+                Console.WriteLine("Reading playlists done..");
+            */
+
+            //read spotify playlist from csv file
+            //string datasetfile = "spotify-streaming-top-50-world-og-min.csv";
+            string datasetfile = "spotify-streaming-top-50-world-og-min-500.csv";
+            Console.WriteLine($"Reading CSV File: {datasetfile}");
+            var csvPlaylists = HelperMethods.ReadCSVDataset(datasetfile);
+            Console.WriteLine("Reaing CSV File done...");
+
+            // creating playlist as per Playlist model
+            Console.WriteLine("Creating Playlist from CSV Data");
+            var dataFiles = HelperMethods.GetPlaylists(csvPlaylists);
+            Console.WriteLine("Creating Playist done...");
 
             // creating an object of Database which hold unique values of the attributes of Song
             Console.WriteLine("Filling Database");
@@ -59,22 +73,7 @@ namespace MultisequenceLearning
             // decoding/reverse mapping the predicted values
             Console.WriteLine("Decoding Predictions");
             var predictions = multiSequenceLearning.RunPrediction(model,database, dataFiles);
-            var decodedPredictions = HelperMethods.DecodePrediction(predictions, dataFiles);
             Console.WriteLine("Completed Predictions");
-
-            // displaying the prediced result
-            if(decodedPredictions.Count>0)
-            {
-                foreach(var item in decodedPredictions)
-                {
-                    Console.WriteLine($"Song: {item.Split('-')[1]}");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Nothing to predict");
-            }
-
 
         }
 

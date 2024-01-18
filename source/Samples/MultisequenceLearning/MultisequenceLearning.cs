@@ -85,37 +85,60 @@ namespace SongPredection
         public List<Dictionary<string,string>> RunPrediction(HtmPredictionEngine trainedEngine, Database db, List<Playlist> datafiles)
         {
             var logs = new List<String>();
-            //Random generated user date;
-            var userInput = HelperMethods.GenerateRandomInput(datafiles);
-            RandomUserInput = userInput.Name.ToString();
-            Console.WriteLine($"Random User Input : {userInput.Name.ToString()}");
-            logs.Add($"Random User Input : {userInput.Name.ToString()}");
-            Dictionary<string, string> pVal;
-            int[] sdr = HelperMethods.EncodeSingleInput(userInput, db);
-            trainedEngine.Reset();
-            var predictedValuesForUserInput = trainedEngine.Predict(sdr);
-            if (predictedValuesForUserInput.Count > 0)
-            {
-                foreach (var predictedVal in predictedValuesForUserInput)
-                {
-                    pVal = new Dictionary<string, string>();
-                    var playlist = predictedVal.PredictedInput.Split('_').First();
-                    var song = predictedVal.PredictedInput.Split('-').Last();
-                    Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song}");
-                    logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song}");
-                    pVal.Add(predictedVal.Similarity.ToString(), $"{playlist}-{song}");
-                    //MultiSequenceLearning.PredictedValues.Add(pVal);
-                    UserPredictedValues?.Add(pVal);
+            List<Song> songs = new List<Song>();
+            List<Dictionary<string, string>> predictedValues = new List<Dictionary<string, string>>();
 
+            //Random generated user song;
+            Console.WriteLine("Genrating random user data input...");
+            for(int i = 0; i<30; i++)
+            {
+                Song userInput = HelperMethods.GenerateRandomInput(datafiles);
+
+                if (!songs.Contains(userInput))
+                    songs.Add(userInput);
+                else
+                    i--;
+            }
+
+            Console.WriteLine("Prediting as per inputs:");
+            foreach(Song userInput in songs)
+            {
+                Dictionary<string, string> pVal = new Dictionary<string, string>();
+
+                Console.WriteLine($"Random User Input : {userInput.Name.ToString()}");
+                logs.Add($"Random User Input : {userInput.Name.ToString()}");
+                int[] sdr = HelperMethods.EncodeSingleInput(userInput, db);
+                trainedEngine.Reset();
+                var predictedValuesForUserInput = trainedEngine.Predict(sdr);
+                if (predictedValuesForUserInput.Count > 0)
+                {
+                    foreach (var predictedVal in predictedValuesForUserInput)
+                    {
+
+                        var playlist = predictedVal.PredictedInput.Split('_').First();
+                        var song = predictedVal.PredictedInput.Split('-').Last();
+                        
+                        Playlist predictedPlaylist = datafiles[Int32.Parse(playlist.Substring(1, 1))];
+                        Song predictedSong = predictedPlaylist.Songs[Int32.Parse(song.Substring(1, 1))];
+
+                        pVal.Add($"{userInput.Name}", $"{playlist}-{song}");
+                        predictedValues?.Add(pVal);
+                        
+                        Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name}");
+                        logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name}");
+                        
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Nothing predicted :(");
+                    logs.Add("Nothing predicted :(");
                 }
             }
-            else
-            {
-                Console.WriteLine("Nothing predicted :(");
-                logs.Add("Nothing predicted :(");
-            }
-
+            
             File.AppendAllLines(OutputPath, logs);
+
+            UserPredictedValues = predictedValues;
 
             return UserPredictedValues;
 
@@ -400,6 +423,10 @@ namespace SongPredection
             Console.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS------------------------");
             //*****************
 
+            var reportsDir = Path.Combine(HelperMethods.BasePath, "reports");
+            if (!Directory.Exists(reportsDir))
+                Directory.CreateDirectory(reportsDir);
+
             DateTime now = DateTime.Now;
             string filename = now.ToString("g");
             // remove any / or : or -
@@ -407,7 +434,7 @@ namespace SongPredection
             filename = filename.Replace("-", "");
             filename = filename.Replace(":", "");
             filename = $"SongPrediction_{filename.Split(" ")[0]}_{now.Ticks.ToString()}.txt";
-            string path = Path.Combine(HelperMethods.BasePath, filename);
+            string path = Path.Combine(HelperMethods.BasePath, "reports", filename);
             OutputPath = path;
             using (StreamWriter swOutput = File.CreateText(OutputPath))
             {
