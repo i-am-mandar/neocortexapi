@@ -18,7 +18,8 @@ namespace SongPredection
     public class MultiSequenceLearning
     {
 
-        public List<double> Accuracy { get; set; }
+        public double PredictionAccuracy { get; set; }   // Accuracy of the predicted sequence from the model
+        public List<double> Accuracy { get; set; }       // Accuracy of the model while learning sequence
         public List<Dictionary<string, string>>? UserPredictedValues { get; set; }
         public long ElapsedTime { get; set; }
         public string OutputPath { get; set; }
@@ -26,6 +27,7 @@ namespace SongPredection
 
         public MultiSequenceLearning()
         {
+            PredictionAccuracy = 0.0;
             Accuracy = new List<double>();
             UserPredictedValues = new List<Dictionary<string, string>>();
             OutputPath = "";
@@ -38,7 +40,7 @@ namespace SongPredection
         /// <param name="dataset">local full path for input dataset</param>
         public HtmPredictionEngine StartExperiment(List<Dictionary<string, int[]>> sequences, Database db, int inputBits)
         {
-            int maxCycles = 100;
+            int maxCycles = 10;
             int numColumns = 2048;
 
             MultiEncoder encoder = HelperMethods.GetSongEncoder(db);
@@ -85,14 +87,14 @@ namespace SongPredection
         public List<Dictionary<string,string>> RunPrediction(HtmPredictionEngine trainedEngine, Database db, List<Playlist> datafiles)
         {
             var logs = new List<String>();
-            List<Song> songs = new List<Song>();
+            List<Tuple<Song,Song, string>> songs = new List<Tuple<Song, Song, string>>();
             List<Dictionary<string, string>> predictedValues = new List<Dictionary<string, string>>();
 
             //Random generated user song;
             Console.WriteLine("Genrating random user data input...");
             for(int i = 0; i<30; i++)
             {
-                Song userInput = HelperMethods.GenerateRandomInput(datafiles);
+                Tuple<Song, Song, string> userInput = HelperMethods.GenerateRandomInput(datafiles);
 
                 if (!songs.Contains(userInput))
                     songs.Add(userInput);
@@ -100,45 +102,72 @@ namespace SongPredection
                     i--;
             }
 
+            int totalPrediction = 0;
+            int matchedPredictions = 0;
+            int noPredictions = 0;
+            double accuracy = 0.0;
+
             Console.WriteLine("Prediting as per inputs:");
-            foreach(Song userInput in songs)
+            foreach(Tuple<Song, Song, string> userInput in songs)
             {
                 Dictionary<string, string> pVal = new Dictionary<string, string>();
 
-                Console.WriteLine($"Random User Input : {userInput.Name.ToString()}");
-                logs.Add($"Random User Input : {userInput.Name.ToString()}");
-                int[] sdr = HelperMethods.EncodeSingleInput(userInput, db);
+                Console.WriteLine($"Random User Input : {userInput.Item1.Name.ToString()}");
+                logs.Add($"Random User Input : {userInput.Item1.Name.ToString()}");
+                int[] sdr = HelperMethods.EncodeSingleInput(userInput.Item1, db);
                 trainedEngine.Reset();
                 var predictedValuesForUserInput = trainedEngine.Predict(sdr);
                 if (predictedValuesForUserInput.Count > 0)
                 {
+                    int i = 0;
                     foreach (var predictedVal in predictedValuesForUserInput)
                     {
-
+                        i++;
                         var playlist = predictedVal.PredictedInput.Split('_').First();
                         var song = predictedVal.PredictedInput.Split('-').Last();
                         
+                        //needs work with substring
                         Playlist predictedPlaylist = datafiles[Int32.Parse(playlist.Substring(1, 1))];
                         Song predictedSong = predictedPlaylist.Songs[Int32.Parse(song.Substring(1, 1))];
 
-                        pVal.Add($"{userInput.Name}", $"{playlist}-{song}");
+                        pVal.Add($"{i}. Predicted: {predictedPlaylist.Name}-{predictedSong.Name}", $"Playlist: {userInput.Item3} Input: {userInput.Item1.Name} - Actual: {userInput.Item2.Name}");
                         predictedValues?.Add(pVal);
                         
-                        Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name}");
-                        logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name}");
-                        
+                        Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name} Actual VALUE: {userInput.Item3}-{userInput.Item2.Name}");
+                        logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name} Actual VALUE: {userInput.Item3}-{userInput.Item2.Name}");
+
+                        totalPrediction++;
+
+                        if(predictedSong.Name == userInput.Item2.Name)
+                        {
+                            matchedPredictions++;
+                        }
+
                     }
                 }
                 else
                 {
                     Console.WriteLine("Nothing predicted :(");
                     logs.Add("Nothing predicted :(");
+                    noPredictions++;
                 }
             }
+
+            /*
+             * Accuracy is calculated as number of matching predictions made 
+             * divided by total number of prediction made for an element of a sequence
+             * 
+             * accuracy = number of matching predictions/total number of prediction * 100
+             */
+
+            accuracy = (double)matchedPredictions / totalPrediction * 100;
+
+            logs.Add($"Prediction Accuracy: {accuracy}");
             
             File.AppendAllLines(OutputPath, logs);
 
             UserPredictedValues = predictedValues;
+            PredictionAccuracy = accuracy;
 
             return UserPredictedValues;
 
@@ -417,7 +446,7 @@ namespace SongPredection
             //****************DISPLAY STATUS OF EXPERIMENT
             Debug.WriteLine("-------------------TRAINING END------------------------");
             Console.WriteLine("-----------------TRAINING END------------------------");
-            string timespend = $"Training Time : {timeSpan.TotalMinutes} total minutes and {timeSpan.Seconds} seconds";
+            string timespend = $"Training Time : {timeSpan.ToString(@"hh\:mm\:ss")}";
             Console.WriteLine(timespend);
             Debug.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS---------------------");
             Console.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS------------------------");
