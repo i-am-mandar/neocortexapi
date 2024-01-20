@@ -369,46 +369,55 @@ namespace SongPredection
         }
 
         /// <summary>
-        /// Selects random song from the List of Playlist
+        /// Selects random song, immediate next songa and playlist name from the List of Playlist
         /// </summary>
         /// <param name="dataFiles">List of Playlist</param>
-        /// <returns>randomly selected object of Song</returns>
-        public static Song GenerateRandomInput(List<Playlist> dataFiles)
+        /// <returns>randomly selected tuple of Song</returns>
+        public static Tuple<Song, Song, string> GenerateRandomInput(List<Playlist> dataFiles)
         {
-            Song song;
+            Tuple<Song, Song> song;
+            string playlist = String.Empty;
 
             int count = dataFiles.Count;
 
             if (count == 1)
             {
                 song = SelectRandomSong(dataFiles[0]);
+                playlist = dataFiles[0].Name;
             }
             else
             {
                 var rnd = new Random(DateTime.Now.Millisecond);
                 int ticks = rnd.Next(0, count);
                 song = SelectRandomSong(dataFiles[ticks]);
+                playlist = dataFiles[ticks].Name;
             }
 
-            return song;
+            Tuple<Song, Song, string> songWithPlaylist = Tuple.Create<Song, Song, string>(song.Item1, song.Item2, playlist);
+
+            return songWithPlaylist;
         }
 
         /// <summary>
-        /// Selects random playlist to choose a song
+        /// Selects random playlist to choose a song and immediate next song
         /// </summary>
         /// <param name="playlist">Playlist of the Song</param>
-        /// <returns>randomly selected object of Song</returns>
-        public static Song SelectRandomSong(Playlist playlist)
+        /// <returns>randomly selected tuple of Song</returns>
+        public static Tuple<Song, Song> SelectRandomSong(Playlist playlist)
         {
-            Song song = new Song();
-            int count = playlist.Songs.Count;
+            Song song1 = new Song();
+            Song song2 = new Song();
+            int count = playlist.Songs.Count-1;
 
             var rnd = new Random(DateTime.Now.Millisecond);
             int ticks = rnd.Next(0, count);
 
-            song = playlist.Songs[ticks];
+            song1 = playlist.Songs[ticks];
+            song2 = playlist.Songs[ticks+1];
 
-            return song;
+            Tuple<Song, Song> tuple = Tuple.Create<Song,Song>(song1, song2);
+
+            return tuple;
         }
 
         /// <summary>
