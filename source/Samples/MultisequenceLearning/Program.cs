@@ -72,7 +72,7 @@ namespace MultisequenceLearning
 
             // decoding/reverse mapping the predicted values
             Console.WriteLine("Decoding Predictions");
-            var predictions = multiSequenceLearning.RunPrediction(model,database, dataFiles);
+            var predictions = multiSequenceLearning.RunPrediction(model,database, dataFiles, scalarDataSet);
             Console.WriteLine("Completed Predictions");
 
         }

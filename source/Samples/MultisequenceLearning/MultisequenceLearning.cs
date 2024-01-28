@@ -40,7 +40,7 @@ namespace SongPredection
         /// <param name="dataset">local full path for input dataset</param>
         public HtmPredictionEngine StartExperiment(List<Dictionary<string, int[]>> sequences, Database db, int inputBits)
         {
-            int maxCycles = 10;
+            int maxCycles = 200;
             int numColumns = 2048;
 
             MultiEncoder encoder = HelperMethods.GetSongEncoder(db);
@@ -84,7 +84,8 @@ namespace SongPredection
         /// <param name="trainedEngine">trained object of class HtmPredictionEngine which will be used to predict</param>
         /// <param name="datafiles"></param>
         /// <param name="db"></param>
-        public List<Dictionary<string,string>> RunPrediction(HtmPredictionEngine trainedEngine, Database db, List<Playlist> datafiles)
+        /// <param name="listOfScalarPlaylist"></param>
+        public List<Dictionary<string,string>> RunPrediction(HtmPredictionEngine trainedEngine, Database db, List<Playlist> datafiles, List<PlaylistScalarModel> listOfScalarPlaylist)
         {
             var logs = new List<String>();
             List<Tuple<Song,Song, string>> songs = new List<Tuple<Song, Song, string>>();
@@ -107,7 +108,7 @@ namespace SongPredection
             int noPredictions = 0;
             double accuracy = 0.0;
 
-            Console.WriteLine("Prediting as per inputs:");
+            Console.WriteLine("Predicting as per inputs:");
             foreach(Tuple<Song, Song, string> userInput in songs)
             {
                 Dictionary<string, string> pVal = new Dictionary<string, string>();
@@ -126,9 +127,13 @@ namespace SongPredection
                         var playlist = predictedVal.PredictedInput.Split('_').First();
                         var song = predictedVal.PredictedInput.Split('-').Last();
                         
-                        //needs work with substring
-                        Playlist predictedPlaylist = datafiles[Int32.Parse(playlist.Substring(1, 1))];
-                        Song predictedSong = predictedPlaylist.Songs[Int32.Parse(song.Substring(1, 1))];
+                        // decode the key predicted and get the playlist and song
+                        PlaylistScalarModel predictedScalarPlaylist = HelperMethods.GetScalarPlaylist(listOfScalarPlaylist, playlist);
+                        ScalarModel predictedScalarModel = HelperMethods.GetScalarSongByID(predictedScalarPlaylist, Int32.Parse(song[1..]));
+
+                        // decoded playlist with datafiles reference
+                        Playlist predictedPlaylist = datafiles[Int32.Parse(predictedScalarPlaylist.Name[1..])];
+                        Song predictedSong = predictedScalarModel.Song;
 
                         pVal.Add($"{i}. Predicted: {predictedPlaylist.Name}-{predictedSong.Name}", $"Playlist: {userInput.Item3} Input: {userInput.Item1.Name} - Actual: {userInput.Item2.Name}");
                         predictedValues?.Add(pVal);
@@ -136,20 +141,23 @@ namespace SongPredection
                         Console.WriteLine($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name} Actual VALUE: {userInput.Item3}-{userInput.Item2.Name}");
                         logs.Add($"SIMILARITY: {predictedVal.Similarity} PREDICTED VALUE: {playlist}-{song} Decoded PREDICTED VALUE: {predictedPlaylist.Name}-{predictedSong.Name} Actual VALUE: {userInput.Item3}-{userInput.Item2.Name}");
 
-                        totalPrediction++;
-
                         if(predictedSong.Name == userInput.Item2.Name)
                         {
                             matchedPredictions++;
+                            Console.WriteLine($"{i} Perfect match for predicted song!");
+                            logs.Add($"{i} Perfect match for predicted song!");
+                            break;
                         }
 
                     }
+                    totalPrediction++;
                 }
                 else
                 {
                     Console.WriteLine("Nothing predicted :(");
                     logs.Add("Nothing predicted :(");
                     noPredictions++;
+                    //totalPrediction++;
                 }
             }
 
@@ -162,6 +170,7 @@ namespace SongPredection
 
             accuracy = (double)matchedPredictions / totalPrediction * 100;
 
+            Console.WriteLine($"Prediction Accuracy: {accuracy}");
             logs.Add($"Prediction Accuracy: {accuracy}");
             
             File.AppendAllLines(OutputPath, logs);
@@ -288,6 +297,7 @@ namespace SongPredection
                 }
             }
 
+            int sequenceCounter = 0;
             // Clear all learned patterns in the classifier.
             //cls.ClearState();
 
@@ -295,7 +305,7 @@ namespace SongPredection
             layer1.HtmModules.Add("tm", tm);
 
             //initial value which will never occur 
-            var lastPredictedValue = new List<string>(new string[] { "0" }); ;
+            var lastPredictedValue = new List<string>(new string[] { "10000" }); ;
             List<string> lastPredictedValueList = new List<string>();
             double lastCycleAccuracy = 0;
             double accuracy = 0;
@@ -315,7 +325,8 @@ namespace SongPredection
                 List<string> prevInputs = new List<string>();
 
                 prevInputs.Add("SX");
-
+                sequenceCounter++;
+                Console.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 /* Loop until maxCycles --- Loop 2*/
                 for (int i = 0; i < maxCycles; i++)
                 {
@@ -410,8 +421,8 @@ namespace SongPredection
                     if (accuracy >= maxPossibleAccuraccy)
                     {
                         SequencesMatchCount++;
-                        Debug.WriteLine($"100% accuracy reched {SequencesMatchCount} times.");
-                        Console.WriteLine($"100% accuracy reched {SequencesMatchCount} times.");
+                        Debug.WriteLine($"100% accuracy reached {SequencesMatchCount} times.");
+                        Console.WriteLine($"100% accuracy reached {SequencesMatchCount} times.");
                         tempLOGFILE.Add(i, $"Cycle : {i} \t  Accuracy:{accuracy} as 100% \t Number of times repeated {SequencesMatchCount}");
                         Accuracy.Add(accuracy);
                         if (SequencesMatchCount >= 30)

@@ -44,11 +44,12 @@ namespace SongPredection
                         var line = reader.ReadLine();
                         string[] values = line.Split(",");
                         lineCount++;
-                        Console.WriteLine($"Line Count:{lineCount}");
+                        if (Debug >= 2)
+                            Console.WriteLine($"Line Count:{lineCount}");
 
                         if(isSkipHeader)
                         {
-                            Console.WriteLine($"Header:\n\t{values[0]},{values[1]},{values[2]},{values[3]},{values[4]}");
+                            Console.WriteLine($"Header:\t{values[0]},\t{values[1]},\t{values[2]},\t{values[3]},\t{values[4]}");
                             isSkipHeader= false;
                             continue;
                         }
@@ -193,8 +194,8 @@ namespace SongPredection
                 var playlist = predict.Values.FirstOrDefault().Split('-').First();
                 var song = predict.Values.FirstOrDefault().Split('-').Last(); ;
 
-                Playlist predictedPlaylist = dataFiles[Int32.Parse(playlist.Substring(1, 1))];
-                Song predictedSong = predictedPlaylist.Songs[Int32.Parse(song.Substring(1, 1))];
+                Playlist predictedPlaylist = dataFiles[Int32.Parse(playlist[1..])];
+                Song predictedSong = predictedPlaylist.Songs[Int32.Parse(song[1..])];
 
                 predicted.Add($"{playlist}-{predictedSong.Name}");
             }
@@ -290,7 +291,7 @@ namespace SongPredection
             foreach (Song song in playlist.Songs)
             {
                 ScalarModel scalarModel = new ScalarModel();
-                scalarModel.Id = i;
+                scalarModel.Id = GetValueByID(db.SongNames, song.Name);
                 scalarModel.Song = song;
                 scalarModel.ScalarSong = new ScalarSong();
                 scalarModel.ScalarSong.Name = GetValueByID(db.SongNames, song.Name);
@@ -450,21 +451,68 @@ namespace SongPredection
         /// <returns>SDR of the ScalarSong</returns>
         private static int[] GetEncodedSong(ScalarSong scalarSong, Database db)
         {
+            ScalarEncoder songNameEncoder = GetSongNameEncoder(db);
             ScalarEncoder singerEncoder = GetSingerEncoder(db);
             ScalarEncoder genreEncoder = GetGenreEncoder(db);
             ScalarEncoder moodEncoder = GetMoodEncoder(db);
 
+            int n_songName = songNameEncoder.N;
             int n_singer = singerEncoder.N;
             int n_genre = genreEncoder.N;
             int n_mood = moodEncoder.N;
 
             int[] sdr = new int[0];
 
+            sdr = sdr.Concat(songNameEncoder.Encode(scalarSong.Name)).ToArray();
             sdr = sdr.Concat(singerEncoder.Encode(scalarSong.Singer1)).ToArray();
             sdr = sdr.Concat(genreEncoder.Encode(scalarSong.Genre1)).ToArray();
             sdr = sdr.Concat(moodEncoder.Encode(scalarSong.Mood)).ToArray();
 
             return sdr;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="listOfScalarPlaylist"></param>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
+        public static PlaylistScalarModel GetScalarPlaylist(List<PlaylistScalarModel> listOfScalarPlaylist, string playlist)
+        {
+            PlaylistScalarModel selectPlaylist = new PlaylistScalarModel();
+
+            foreach(PlaylistScalarModel playlistScalar in listOfScalarPlaylist)
+            {
+                if(playlistScalar.Name == playlist)
+                {
+                    selectPlaylist = playlistScalar;
+                    break;
+                }
+            }
+
+            return selectPlaylist;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="predictedScalarPlaylist"></param>
+        /// <param name="songID"></param>
+        /// <returns></returns>
+        public static ScalarModel GetScalarSongByID(PlaylistScalarModel predictedScalarPlaylist, int songID)
+        {
+            ScalarModel model =  new ScalarModel();
+
+            foreach(ScalarModel scalarSong in predictedScalarPlaylist.ScalarModelList)
+            {
+                if(scalarSong.Id == songID)
+                {
+                    model = scalarSong;
+                    break;
+                }
+            }
+
+            return model;
         }
 
         /// <summary>
@@ -490,6 +538,37 @@ namespace SongPredection
            });
 
             return scalarEncoder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="minVal"></param>
+        /// <param name="maxVal"></param>
+        /// <returns></returns>
+        public static ScalarEncoder GetSongNameEncoder(int minVal, int maxVal)
+        {
+            //size is added to maxValue which should result in odd number
+            //int size = ((maxVal - minVal) % 2 == 0) ? 7 : 8;
+            int size = 21;
+
+            ScalarEncoder songEncoder = GetScalarEncoder(size, minVal, maxVal, "Singer");
+
+            return songEncoder;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="db"></param>
+        /// <returns></returns>
+        public static ScalarEncoder GetSongNameEncoder(Database db)
+        {
+            int size = 21;
+
+            ScalarEncoder songEncoder = GetScalarEncoder(size, SongID - db.SongNames.Count, SongID, "Songs");
+
+            return songEncoder;
         }
 
         /// <summary>
@@ -598,6 +677,7 @@ namespace SongPredection
         /// <returns>Object of MultiEncoder</returns>
         public static MultiEncoder GetSongEncoder(Database db)
         {
+            EncoderBase songNameEncoder = GetSongNameEncoder(SongID - db.SongNames.Count, SongID);
             EncoderBase singerEncoder = GetSingerEncoder(SingerID - db.Singers.Count, SingerID);
             EncoderBase genreEncoder = GetGenreEncoder(GenreID - db.Genres.Count, GenreID);
             EncoderBase moodEncoder = GetMoodEncoder(MoodID - db.Moods.Count, MoodID);
@@ -619,11 +699,12 @@ namespace SongPredection
         /// <returns>value of input bits of SDR</returns>
         public static int GetInputBits(Database db)
         {
+            EncoderBase songNameEncoder = GetSongNameEncoder(SongID - db.SongNames.Count, SongID);
             EncoderBase singerEncoder = GetSingerEncoder(SingerID - db.Singers.Count, SingerID);
             EncoderBase genreEncoder = GetGenreEncoder(GenreID - db.Genres.Count, GenreID);
             EncoderBase moodEncoder = GetMoodEncoder(MoodID - db.Moods.Count, MoodID);
 
-            return (singerEncoder.N + genreEncoder.N + moodEncoder.N);
+            return (songNameEncoder.N + singerEncoder.N + genreEncoder.N + moodEncoder.N);
         }
 
         /// <summary>
@@ -654,8 +735,8 @@ namespace SongPredection
                 ConnectedPermanence = 0.5,
 
                 // Learning is slower than forgetting in this case.
-                PermanenceDecrement = 0.25,
-                PermanenceIncrement = 0.15,
+                PermanenceDecrement = 0.15,
+                PermanenceIncrement = 0.25,
 
                 // Used by punishing of segments.
                 PredictedSegmentDecrement = 0.1,
