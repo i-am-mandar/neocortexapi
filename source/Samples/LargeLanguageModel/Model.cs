@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 
 namespace LargeLanguageModel
 {
+    [Obsolete]
     public class Sentence
     {
         public string[] Word { get; set; }
     }
-    
+
+    [Obsolete]
     public class Conversation
     {
         public string Speaker { get; set; }

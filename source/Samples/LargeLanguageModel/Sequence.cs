@@ -21,12 +21,13 @@ namespace LargeLanguageModel
     public class EncodedSequence
     {
         public string Name { get; set; }
-        public List<Tuple<string, int[]>> encodedWords { get; set; }
+        //string = word, int = key, int[] SDR
+        public List<Tuple<string, int, int[]>> encodedWords { get; set; }
 
         public EncodedSequence()
         {
             this.Name = string.Empty;
-            this.encodedWords = new List<Tuple<string, int[]>>();
+            this.encodedWords = new List<Tuple<string, int, int[]>>();
         }
     }
 }

@@ -210,8 +210,9 @@ namespace LargeLanguageModel
                 foreach(string word in sequence.Words)
                 {
                     int[] sdr = new int[0];
-                    sdr = sdr.Concat(wordEncoder.Encode(GetValueByID(db.Word, word))).ToArray();
-                    Tuple<string, int[]> encodedWord = Tuple.Create<string, int[]>(word, sdr);
+                    int key = GetValueByID(db.Word, word);
+                    sdr = sdr.Concat(wordEncoder.Encode(key)).ToArray();
+                    Tuple<string, int, int[]> encodedWord = Tuple.Create<string, int, int[]>(word, key, sdr);
                     encodedSequence.encodedWords.Add(encodedWord);
                 }
                 encodedSequences.Add(encodedSequence);
