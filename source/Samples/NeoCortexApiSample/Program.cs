@@ -1,6 +1,6 @@
 ﻿using NeoCortexApi;
 using NeoCortexApi.Encoders;
-using NeoCortexApi;
+using NeoCortexApi.Utility;
 using System;
 using System.Drawing;
 using System.IO;
@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using static NeoCortexApiSample.MultiSequenceLearning;
+using NeoCortex;
 
 namespace NeoCortexApiSample
 {
@@ -265,7 +266,7 @@ namespace NeoCortexApiSample
         predictor.Reset();
         PredictNextElement(predictor, list3);
     }
-    private static void PredictNextElement(HtmPredictionEngine predictor, double[] list)
+    private static void PredictNextElement(Predictor predictor, double[] list)
     {
         Debug.WriteLine("------------------------------");
         foreach (var item in list)
