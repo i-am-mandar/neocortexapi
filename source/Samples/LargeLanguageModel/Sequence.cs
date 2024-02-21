@@ -22,6 +22,7 @@ namespace LargeLanguageModel
     {
         public string Name { get; set; }
         //string = word, int = key, int[] SDR
+        // make class of the class of tuple - to do
         public List<Tuple<string, int, int[]>> encodedWords { get; set; }
 
         public EncodedSequence()

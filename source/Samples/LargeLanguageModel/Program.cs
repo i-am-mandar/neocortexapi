@@ -46,6 +46,10 @@ namespace LargeLanguageModel
             Console.WriteLine("Encoding all words in sequence...");
             var encodedSequence = LLMHelperMethods.GetEncodedSequence(sequences, database, wordEncoder);
             Console.WriteLine("Encoding all words in sequence done...");
+
+            //train in parallel => this is not implement
+
+            //start learning the model and lets see how it goes - to do
         }
     }
 }

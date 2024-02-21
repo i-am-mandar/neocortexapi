@@ -101,7 +101,7 @@ namespace LargeLanguageModel
             List<Sequence> sequences = new List<Sequence>();
 
             int count = 0;
-            int maxCount = 10;
+            int maxCount = 10; //configure - to do
             int sequenceCount = 1;
 
             Sequence sequence = new Sequence();
