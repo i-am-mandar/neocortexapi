@@ -132,10 +132,10 @@ namespace LargeLanguageModel
         /// </summary>
         /// <param name="wordsBroken"></param>
         /// <returns></returns>
-        public static Database FillDatabase(List<string> wordsBroken)
+        public static Corpus FillDatabase(List<string> wordsBroken)
         {
             int count = 0;
-            Database db = new Database();
+            Corpus db = new Corpus();
             foreach(string word in wordsBroken)
             {
                 string cleanWord = word.ToLower();
@@ -150,7 +150,7 @@ namespace LargeLanguageModel
                 }
             }
 
-            Database dbSorted = new Database();
+            Corpus dbSorted = new Corpus();
             SortedDictionary<string, int>.KeyCollection sortedKeys = db.Word.Keys;
             foreach (string key in sortedKeys)
             {
@@ -165,7 +165,7 @@ namespace LargeLanguageModel
         /// </summary>
         /// <param name="db"></param>
         /// <returns></returns>
-        public static ScalarEncoder GetWordEncoder(Database db)
+        public static ScalarEncoder GetWordEncoder(Corpus db)
         {
             int size = 3;
             
@@ -199,7 +199,7 @@ namespace LargeLanguageModel
             return scalarEncoder;
         }
 
-        public static List<EncodedSequence> GetEncodedSequence(List<Sequence> sequences, Database db, ScalarEncoder wordEncoder)
+        public static List<EncodedSequence> GetEncodedSequence(List<Sequence> sequences, Corpus db, ScalarEncoder wordEncoder)
         {
             List<EncodedSequence> encodedSequences = new List<EncodedSequence>();
 

@@ -18,17 +18,23 @@ namespace LargeLanguageModel
         }
     }
 
+    public class EncodedWord
+    {
+        public string Word { get; set; }
+        public int Key { get; set; }
+        public int[] SDR { get; set; }
+    }
+
     public class EncodedSequence
     {
         public string Name { get; set; }
         //string = word, int = key, int[] SDR
-        // make class of the class of tuple - to do
-        public List<Tuple<string, int, int[]>> encodedWords { get; set; }
+        public List<EncodedWord> encodedWords { get; set; }
 
         public EncodedSequence()
         {
             this.Name = string.Empty;
-            this.encodedWords = new List<Tuple<string, int, int[]>>();
+            this.encodedWords = new List<EncodedWord>();
         }
     }
 }

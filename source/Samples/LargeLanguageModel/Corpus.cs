@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace LargeLanguageModel
 {
-    //call it corpus - to do
-    public class Database
+    // Corpus is a collection of authentic text or audio organized into datasets.
+    public class Corpus
     {
         // simialar things should be encoded similar way
         public SortedDictionary<string, int> Word = new SortedDictionary<string, int>();
