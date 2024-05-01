@@ -3,6 +3,7 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
+using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +32,7 @@ namespace LargeLanguageModel
 
             HtmConfig cfg = GetHtmConfig(inputBits, numColumns);
 
-            
+
             return RunExperiment(inputBits, cfg, sequences);
         }
 
@@ -90,7 +91,7 @@ namespace LargeLanguageModel
 
             //double[] inputs = inputValues.ToArray();
             int[] prevActiveCols = new int[0];
-            
+
             int cycle = 0;
             int matches = 0;
             int maxCycles = 3500;
@@ -111,7 +112,7 @@ namespace LargeLanguageModel
                     foreach (var input in inputs.EncodedWords)
                     {
                         Debug.WriteLine($"-- Sequence: {inputs.Name} - Input: {input.Word} --");
-                    
+
                         var lyrOut = layer1.Compute(input.SDR, true);
 
                         if (isInStableState)
@@ -214,12 +215,12 @@ namespace LargeLanguageModel
                                 Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
                             }
 
-                            lastPredictedValues = predictedInputValues.Select(v=>v.PredictedInput).ToList();
+                            lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
                         }
                         else
                         {
                             Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
-                            lastPredictedValues = new List<string> ();
+                            lastPredictedValues = new List<string>();
                         }
                     }
 
@@ -260,11 +261,84 @@ namespace LargeLanguageModel
             }
 
             Debug.WriteLine("------------ END ------------");
-           
+
             return new Predictor(layer1, mem, cls);
         }
 
-      
+
+        public List<List<string>> RunPrediction(Predictor model, Corpus corpus, List<Sequence> testSequences, ScalarEncoder wordEncoder)
+        {
+            List<EncodedSequence> encodedTestSequences = LLMWordHelperMethods.GetEncodedSequence(testSequences, corpus, wordEncoder);
+            List<List<string>>? predictedValuesList = new List<List<string>>();
+
+
+            int totalPrediction = 0;
+            int matchedPredictions = 0;
+            int noPredictions = 0;
+            double accuracy = 0.0;
+            bool first = true;
+            EncodedWord prev = new EncodedWord("", -1, new int[] { 0 }); // initialize with null
+            EncodedWord next = new EncodedWord("", -1, new int[] { 0 }); // initialize with null
+
+            foreach (EncodedSequence encodedSequence in encodedTestSequences)
+            {
+                model.Reset();
+                List<string>? predictedValues = new List<string>();
+                Console.WriteLine("-----------------------");
+                foreach (EncodedWord word in encodedSequence.EncodedWords)
+                {
+                    next = word;
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Sequence: {encodedSequence.Name} Test Input: {prev.Word}");
+                        var predictedValuesForInput = model.Predict(prev.SDR);
+                        if (predictedValuesForInput.Count > 0)
+                        {
+                            int i = 0;
+                            foreach (var predictedVal in predictedValuesForInput)
+                            {
+                                i++;
+                                var pSequence = predictedVal.PredictedInput.Split('_').First();
+                                var pWordKey = predictedVal.PredictedInput.Split('-').Last();
+
+                                // decode the predicted work key and find actual word from corpus
+
+                                string pVal = $"Input: {prev.Word} Ouput- Sequence: {pSequence} - Actual: {pWordKey} - SIMILARITY: {predictedVal.Similarity}";
+                                predictedValues.Add(pVal);
+
+                                Console.WriteLine($"{pVal}");
+
+                                if (next.Key == Int32.Parse(pWordKey))
+                                {
+                                    matchedPredictions++;
+                                    Console.WriteLine($"{i} Perfect match for predicted song!");
+                                    break;
+                                }
+
+                            }
+                            totalPrediction++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Nothing predicted :(");
+                            noPredictions++;
+                            //totalPrediction++;
+                        }
+                    }
+
+                    prev = next;
+                }
+                predictedValuesList.Add(predictedValues);
+            }
+
+            return predictedValuesList;
+
+        }
+
         /// <summary>
         /// Gets the number of all unique inputs.
         /// </summary>

@@ -131,6 +131,45 @@ namespace LargeLanguageModel
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="words"></param>
+        /// <returns></returns>
+        public static List<Sequence> CreateTestSequence(List<string> words)
+        {
+            List<Sequence> sequences = new List<Sequence>();
+            bool first = true;
+            int sequenceCount = 1;
+            Sequence sequence = new Sequence();
+            sequence.Name = $"S{sequenceCount}";
+
+            foreach (string word in words)
+            {
+                if (word.Equals("#"))
+                {
+                    if (first)
+                    {
+                        first = false;
+                        continue;
+                    }
+
+                    sequences.Add(sequence);
+                    sequenceCount++;
+
+                    sequence = new Sequence();
+                    sequence.Name = $"S{sequenceCount}";
+
+                    continue;
+                }
+                sequence.Words.Add(word);
+            }
+            
+            sequences.Add(sequence);
+            return sequences;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="wordsBroken"></param>
         /// <returns></returns>
         public static Corpus FillDatabase(List<string> wordsBroken)

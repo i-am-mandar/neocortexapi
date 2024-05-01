@@ -19,8 +19,10 @@ namespace LargeLanguageModel
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            bool useTestData = true;
-            string datafile = useTestData ? "input-min-100.txt" : "input.txt";
+            bool useMinData = true;
+            bool useMinTestData = useMinData;
+
+            string datafile = useMinData ? "input-min-100.txt" : "input.txt";
             Console.WriteLine($"Using datafile: {datafile}");
 
             Console.WriteLine("Reading datafile...");
@@ -47,6 +49,21 @@ namespace LargeLanguageModel
             var encodedSequence = LLMWordHelperMethods.GetEncodedSequence(sequences, corpus, wordEncoder);
             Console.WriteLine("Encoding all words in sequence done...");
 
+            string testDatafile = useMinTestData ? "test-input-min-100.txt" : "test-input.txt";
+            Console.WriteLine($"Using datafile: {testDatafile}");
+
+            Console.WriteLine("Reading test datafile...");
+            var testWords = LLMWordHelperMethods.ReadInput(testDatafile);
+            Console.WriteLine("Reading test datafile done...");
+
+            Console.WriteLine("Breaking down test words...");
+            var testWordsBroken = LLMWordHelperMethods.BreakDownWords(testWords);
+            Console.WriteLine("Breaking down test words done...");
+
+            Console.WriteLine("Creating test sequences..");
+            var testSequences = LLMWordHelperMethods.CreateTestSequence(testWordsBroken);
+            Console.WriteLine("Creating test sequences done...");
+
             //train in parallel => this is not implement
             //start learning the model and lets see how it goes - to do
             Console.WriteLine("Running Multisequence Learning experiment");
@@ -54,6 +71,11 @@ namespace LargeLanguageModel
             MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
             var model = multiSequenceLearning.Run(encodedSequence, corpus, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
+
+            // decoding/reverse mapping the predicted values
+            Console.WriteLine("Decoding Predictions");
+            var logs = multiSequenceLearning.RunPrediction(model, corpus, testSequences, wordEncoder);
+            Console.WriteLine("Completed Predictions");
 
         }
     }
