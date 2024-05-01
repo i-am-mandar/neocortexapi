@@ -40,7 +40,7 @@ namespace SongPredection
         /// <param name="dataset">local full path for input dataset</param>
         public HtmPredictionEngine StartExperiment(List<Dictionary<string, int[]>> sequences, Database db, int inputBits)
         {
-            int maxCycles = 200;
+            int maxCycles = 5;
             int numColumns = 2048;
 
             MultiEncoder encoder = HelperMethods.GetSongEncoder(db);
@@ -457,7 +457,7 @@ namespace SongPredection
             //****************DISPLAY STATUS OF EXPERIMENT
             Debug.WriteLine("-------------------TRAINING END------------------------");
             Console.WriteLine("-----------------TRAINING END------------------------");
-            string timespend = $"Training Time : {timeSpan.ToString(@"hh\:mm\:ss")}";
+            string timespend = $"Training Time : {timeSpan.ToString(@"d.hh\:mm\:ss")}";
             Console.WriteLine(timespend);
             Debug.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS---------------------");
             Console.WriteLine("-------------------WRTING TRAINING OUTPUT LOGS------------------------");
