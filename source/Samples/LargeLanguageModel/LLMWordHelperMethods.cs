@@ -5,14 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NeoCortexApi.Encoders;
+using Org.BouncyCastle.Cms;
 
 namespace LargeLanguageModel
 {
-    public class LLMHelperMethods
+    public class LLMWordHelperMethods
     {
         public static int DEBUG = 2;
         public static int UNIQUE_WORD = 1;
-        public LLMHelperMethods() { }
+        public LLMWordHelperMethods() { }
 
         public static string BasePath = AppDomain.CurrentDomain.BaseDirectory;
 
@@ -190,7 +191,7 @@ namespace LargeLanguageModel
                 { "W", w},
                 { "N", n},
                 { "MinVal", (double)minVal},   // Min value = (0).
-                { "MaxVal", (double)maxVal+1}, // Max value = (no of unique songs in DB).
+                { "MaxVal", (double)maxVal+1}, // Max value = (no of unique songs in Corpus).
                 { "Periodic", false},
                 { "Name", name},
                 { "ClipInput", true},
@@ -212,8 +213,8 @@ namespace LargeLanguageModel
                     int[] sdr = new int[0];
                     int key = GetValueByID(db.Word, word);
                     sdr = sdr.Concat(wordEncoder.Encode(key)).ToArray();
-                    Tuple<string, int, int[]> encodedWord = Tuple.Create<string, int, int[]>(word, key, sdr);
-                    encodedSequence.encodedWords.Add(encodedWord);
+                    EncodedWord encodedWord = new EncodedWord(word, key, sdr);
+                    encodedSequence.EncodedWords.Add(encodedWord);
                 }
                 encodedSequences.Add(encodedSequence);
             }
@@ -244,6 +245,18 @@ namespace LargeLanguageModel
                 value = 0;
                 return value;
             }
+        }
+
+        /// <summary>
+        /// Calculates the value of the input bit in a SDR
+        /// </summary>
+        /// <param name="db">Database of the songs</param>
+        /// <returns>value of input bits of SDR</returns>
+        public static int GetInputBits(Corpus db)
+        {
+            EncoderBase corpusEncoder = GetWordEncoder(db);
+            
+            return (corpusEncoder.N);
         }
     }
 }

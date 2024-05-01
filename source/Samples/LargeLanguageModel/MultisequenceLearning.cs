@@ -3,7 +3,6 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
-using Org.BouncyCastle.Asn1.Tsp;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,29 +17,28 @@ namespace LargeLanguageModel
     public class MultiSequenceLearning
     {
         /// <summary>
-        /// Runs the learning of sequences.
+        /// Runs the learning of sequences and create a trained model
         /// </summary>
-        /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
-        public Predictor Run(Dictionary<string, List<int>> sequences, int max)
+        /// <param name="sequences"></param>
+        /// <param name="db"></param>
+        /// <param name="inputBits"></param>
+        /// <returns>Object of Predictor class which is trained model</returns>
+        public Predictor Run(List<EncodedSequence> sequences, Corpus db, int inputBits)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
-            int inputBits = 100;
-            int numColumns = 1024;
+            int numColumns = 2048;
 
             HtmConfig cfg = GetHtmConfig(inputBits, numColumns);
 
-            //int max = 20;
-
-            EncoderBase encoder = GetScalarEncoder(max, inputBits);
-
-            return RunExperiment(inputBits, cfg, encoder, sequences);
+            
+            return RunExperiment(inputBits, cfg, sequences);
         }
 
         /// <summary>
         /// Runs the Multisequence Learning algorithm for the experiment
         /// </summary>
-        private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<int>> sequences)
+        private Predictor RunExperiment(int inputBits, HtmConfig cfg, List<EncodedSequence> sequences)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -53,7 +51,8 @@ namespace LargeLanguageModel
 
             HtmClassifier<string, ComputeCycle> cls = new HtmClassifier<string, ComputeCycle>();
 
-            var numUniqueInputs = GetNumberOfInputs(sequences);
+            var numUniqueInputs = LLMWordHelperMethods.UNIQUE_WORD;
+            //var numUniqueInputs = GetNumberOfInputs(sequences);
 
             CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
@@ -86,7 +85,7 @@ namespace LargeLanguageModel
             // In this stage we want that SP get boosted and see all elements before we start learning with TM.
             // All would also work fine with TM in layer, but it would work much slower.
             // So, to improve the speed of experiment, we first ommit the TM and then after the newborn-stage we add it to the layer.
-            layer1.HtmModules.Add("encoder", encoder);
+            /* already encoeded data so no need to encode again */
             layer1.HtmModules.Add("sp", sp);
 
             //double[] inputs = inputValues.ToArray();
@@ -94,9 +93,6 @@ namespace LargeLanguageModel
             
             int cycle = 0;
             int matches = 0;
-
-            var lastPredictedValues = new List<string>(new string[] { "0"});
-            
             int maxCycles = 3500;
 
             //
@@ -105,19 +101,18 @@ namespace LargeLanguageModel
 
             for (int i = 0; i < maxCycles && isInStableState == false; i++)
             {
-                matches = 0;
-
                 cycle++;
 
-                Debug.WriteLine($"-------------- Newborn Cycle {cycle} ---------------");
+                Debug.WriteLine($"-------------- Training SP Newborn Cycle {cycle} ---------------");
+                Console.WriteLine($"-------------- Training SP Newborn Cycle {cycle} ---------------");
 
                 foreach (var inputs in sequences)
                 {
-                    foreach (var input in inputs.Value)
+                    foreach (var input in inputs.EncodedWords)
                     {
-                        Debug.WriteLine($" -- {inputs.Key} - {input} --");
+                        Debug.WriteLine($"-- Sequence: {inputs.Name} - Input: {input.Word} --");
                     
-                        var lyrOut = layer1.Compute(input, true);
+                        var lyrOut = layer1.Compute(input.SDR, true);
 
                         if (isInStableState)
                             break;
@@ -134,13 +129,17 @@ namespace LargeLanguageModel
             // We activate here the Temporal Memory algorithm.
             layer1.HtmModules.Add("tm", tm);
 
+            cycle = 0;
+            var lastPredictedValues = new List<string>(new string[] { "0" });
+
             //
             // Loop over all sequences.
-            foreach (var sequenceKeyPair in sequences)
+            foreach (var inputs in sequences)
             {
-                Debug.WriteLine($"-------------- Sequences {sequenceKeyPair.Key} ---------------");
+                Debug.WriteLine($"-------------- Training Sequence Number: {inputs.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Console.WriteLine($"-------------- Training Sequence Number: {inputs.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
-                int maxPrevInputs = sequenceKeyPair.Value.Count - 1;
+                int maxPrevInputs = inputs.EncodedWords.Count - 1;
 
                 List<string> previousInputs = new List<string>();
 
@@ -159,18 +158,19 @@ namespace LargeLanguageModel
 
                     Debug.WriteLine("");
 
-                    Debug.WriteLine($"-------------- Cycle {cycle} ---------------");
+                    Debug.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
+                    Console.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
                     Debug.WriteLine("");
 
-                    foreach (var input in sequenceKeyPair.Value)
+                    foreach (var input in inputs.EncodedWords)
                     {
-                        Debug.WriteLine($"-------------- {input} ---------------");
+                        Debug.WriteLine($"-- Sequence: {inputs.Name} - Input: {input.Word} --");
 
-                        var lyrOut = layer1.Compute(input, true) as ComputeCycle;
+                        var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
                         var activeColumns = layer1.GetResult("sp") as int[];
 
-                        previousInputs.Add(input.ToString());
+                        previousInputs.Add(input.Key.ToString());
                         if (previousInputs.Count > (maxPrevInputs + 1))
                             previousInputs.RemoveAt(0);
 
@@ -182,19 +182,12 @@ namespace LargeLanguageModel
                         if (previousInputs.Count < maxPrevInputs)
                             continue;
 
-                        string key = GetKey(previousInputs, input, sequenceKeyPair.Key);
+                        string key = GetKey(previousInputs, inputs.Name);
 
-                        List<Cell> actCells;
+                        /* Get Active Cells */
+                        List<Cell> actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
 
-                        if (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count)
-                        {
-                            actCells = lyrOut.ActiveCells;
-                        }
-                        else
-                        {
-                            actCells = lyrOut.WinnerCells;
-                        }
-
+                        /* Learn the combination of key and Active Cells   key = Sequence of words number */
                         cls.Learn(key, actCells.ToArray());
 
                         Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
@@ -231,11 +224,11 @@ namespace LargeLanguageModel
                     }
 
                     // The first element (a single element) in the sequence cannot be predicted
-                    double maxPossibleAccuraccy = (double)((double)sequenceKeyPair.Value.Count - 1) / (double)sequenceKeyPair.Value.Count * 100.0;
+                    double maxPossibleAccuraccy = (double)((double)inputs.EncodedWords.Count - 1) / (double)inputs.EncodedWords.Count * 100.0;
 
-                    double accuracy = (double)matches / (double)sequenceKeyPair.Value.Count * 100.0;
+                    double accuracy = (double)matches / (double)inputs.EncodedWords.Count * 100.0;
 
-                    Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequenceKeyPair.Value.Count}\t {accuracy}%");
+                    Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputs.EncodedWords.Count}\t {accuracy}%");
 
                     if (accuracy >= maxPossibleAccuraccy)
                     {
@@ -247,7 +240,7 @@ namespace LargeLanguageModel
                         if (maxMatchCnt >= 30)
                         {
                             sw.Stop();
-                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.Key} learning time: {sw.Elapsed}.");
+                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {inputs.Name} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
                         }
@@ -275,16 +268,15 @@ namespace LargeLanguageModel
         /// <summary>
         /// Gets the number of all unique inputs.
         /// </summary>
-        /// <param name="sequences">Alle sequences.</param>
+        /// <param name="sequences">All sequences.</param>
         /// <returns></returns>
-        private int GetNumberOfInputs(Dictionary<string, List<int>> sequences)
+        private int GetNumberOfInputs(List<EncodedSequence> sequences)
         {
             int num = 0;
 
             foreach (var inputs in sequences)
             {
-                //num += inputs.Value.Distinct().Count();
-                num += inputs.Value.Count;
+                num += inputs.EncodedWords.Count;
             }
 
             return num;
@@ -297,10 +289,9 @@ namespace LargeLanguageModel
         /// The prediction code can then extract the sequence prefix to the predicted element.
         /// </summary>
         /// <param name="prevInputs"></param>
-        /// <param name="input"></param>
         /// <param name="sequence"></param>
         /// <returns></returns>
-        private static string GetKey(List<string> prevInputs, double input, string sequence)
+        private static string GetKey(List<string> prevInputs, string sequence)
         {
             string key = String.Empty;
 

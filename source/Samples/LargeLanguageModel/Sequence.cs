@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeoCortexApi.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,18 +24,25 @@ namespace LargeLanguageModel
         public string Word { get; set; }
         public int Key { get; set; }
         public int[] SDR { get; set; }
+
+        public EncodedWord(string word, int key, int[] sdr)
+        {
+            this.Word = word;
+            this.Key = key;
+            this.SDR = sdr;
+        }
     }
 
     public class EncodedSequence
     {
         public string Name { get; set; }
         //string = word, int = key, int[] SDR
-        public List<EncodedWord> encodedWords { get; set; }
+        public List<EncodedWord> EncodedWords { get; set; }
 
         public EncodedSequence()
         {
             this.Name = string.Empty;
-            this.encodedWords = new List<EncodedWord>();
+            this.EncodedWords = new List<EncodedWord>();
         }
     }
 }
