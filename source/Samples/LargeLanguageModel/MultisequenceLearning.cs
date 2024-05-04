@@ -39,6 +39,11 @@ namespace LargeLanguageModel
         /// <summary>
         /// Runs the Multisequence Learning algorithm for the experiment
         /// </summary>
+        /// <param name="inputBits"></param>
+        /// <param name="cfg"></param>
+        /// <param name="sequences"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, List<EncodedSequence> sequences)
         {
             Stopwatch sw = new Stopwatch();
@@ -265,7 +270,14 @@ namespace LargeLanguageModel
             return new Predictor(layer1, mem, cls);
         }
 
-
+        /// <summary>
+        /// Runs the Prediction on model learned from Multisequence Learning algorithm for the experiment
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="corpus"></param>
+        /// <param name="testSequences"></param>
+        /// <param name="wordEncoder"></param>
+        /// <returns></returns>
         public List<List<string>> RunPrediction(Predictor model, Corpus corpus, List<Sequence> testSequences, ScalarEncoder wordEncoder)
         {
             List<EncodedSequence> encodedTestSequences = LLMWordHelperMethods.GetEncodedSequence(testSequences, corpus, wordEncoder);
