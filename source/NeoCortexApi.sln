@@ -56,9 +56,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeoCortexApiAnomaly", "Samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeocortexApiLLMSample", "NeocortexApiLLMSample\NeocortexApiLLMSample.csproj", "{8D1F778F-AF73-44CF-965E-C061C07B99A7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApproveMultiSequenceLearning", "Samples\ApproveMultiSequenceLearning\ApproveMultiSequenceLearning.csproj", "{D56D5B70-0094-41F0-9FFD-BCAB50BA7737}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApproveMultiSequenceLearning", "Samples\ApproveMultiSequenceLearning\ApproveMultiSequenceLearning.csproj", "{D56D5B70-0094-41F0-9FFD-BCAB50BA7737}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LabelPrediction", "MySEProject\LabelPrediction\LabelPrediction.csproj", "{B654C656-9B51-4EBC-B5FB-833B9F8ED771}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LabelPrediction", "MySEProject\LabelPrediction\LabelPrediction.csproj", "{B654C656-9B51-4EBC-B5FB-833B9F8ED771}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LargeLanguageModel2", "Samples\LargeLanguageModel2\LargeLanguageModel2.csproj", "{7AA4999C-AB74-4F37-804A-C49BB694393F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -134,6 +136,10 @@ Global
 		{B654C656-9B51-4EBC-B5FB-833B9F8ED771}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B654C656-9B51-4EBC-B5FB-833B9F8ED771}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B654C656-9B51-4EBC-B5FB-833B9F8ED771}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AA4999C-AB74-4F37-804A-C49BB694393F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AA4999C-AB74-4F37-804A-C49BB694393F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AA4999C-AB74-4F37-804A-C49BB694393F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AA4999C-AB74-4F37-804A-C49BB694393F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,6 +152,7 @@ Global
 		{8D1F778F-AF73-44CF-965E-C061C07B99A7} = {99AE2313-7D07-4905-A0BB-52D304FCC2F7}
 		{D56D5B70-0094-41F0-9FFD-BCAB50BA7737} = {99AE2313-7D07-4905-A0BB-52D304FCC2F7}
 		{B654C656-9B51-4EBC-B5FB-833B9F8ED771} = {99AE2313-7D07-4905-A0BB-52D304FCC2F7}
+		{7AA4999C-AB74-4F37-804A-C49BB694393F} = {99AE2313-7D07-4905-A0BB-52D304FCC2F7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {71185BAD-1342-4836-BCDA-6EC97118F92D}
