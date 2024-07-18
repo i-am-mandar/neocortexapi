@@ -11,8 +11,8 @@ namespace LargeLanguageModel2
     {
         public static int DEBUG = 2;
         public static int UNIQUE_WORD = 1;
-        public static int TOKEN_SIZE = 16;
-        public static double OVERLAP_SIZE = 0.65;
+        public static int TOKEN_SIZE = 8;
+        public static double OVERLAP_SIZE = 0.50;
         public static double SPLIT_SIZE = 0.1;
         public LLMCharHelperMethods() { }
 
@@ -31,6 +31,7 @@ namespace LargeLanguageModel2
                 //return File.ReadAllLines(fileName);
 
                 string content = File.ReadAllText(fileName).Replace("\r", "");
+                content = content.Replace(" ", "~");
 
                 string[] words = content.Split(new string[] { " " }, StringSplitOptions.None);
 
@@ -100,11 +101,16 @@ namespace LargeLanguageModel2
 
                 for (int i = 0; i < arr.Length; i++)
                 {
-                    chars.Add(arr[i]);
+                    if (arr[i] == '~')
+                    {
+                        chars.Add(' ');
+                    }
+                    else
+                    {
+                        chars.Add(arr[i]);
+                    }
+                    
                 }
-
-                // neeed to come back here ----------------------------------------
-                // chars.Add(' ');
 
             }
 
@@ -151,9 +157,9 @@ namespace LargeLanguageModel2
         /// <returns></returns>
         public static ScalarEncoder GetCharEncoder(Token tk)
         {
-            int size = 31;
+            int size = 15;
 
-            ScalarEncoder charEncoder = GetScalarEncoder(size, UNIQUE_WORD - tk.Char.Count, UNIQUE_WORD, "Char");
+            ScalarEncoder charEncoder = GetScalarEncoder(size, tk.Char.First().Value, tk.Char.Last().Value, "Char");
 
             return charEncoder;
         }
@@ -177,7 +183,8 @@ namespace LargeLanguageModel2
                 { "MaxVal", (double)maxVal+1}, // Max value = (no of unique songs in Corpus).
                 { "Periodic", false},
                 { "Name", name},
-                { "ClipInput", true},
+                { "ClipInput", false},
+                { "Radius", -1.0},
            });
 
             return scalarEncoder;

@@ -23,7 +23,7 @@ namespace LargeLanguageModel2
         /// <summary>
         /// Runs the learning of sequences and create a trained model
         /// </summary>
-        /// <param name="sequences"></param>
+        /// <param name="multiSequences"></param>
         /// <param name="db"></param>
         /// <param name="inputBits"></param>
         /// <returns>Object of Predictor class which is trained model</returns>
@@ -31,7 +31,7 @@ namespace LargeLanguageModel2
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
-            int numColumns = 2048;
+            int numColumns = 1024;
 
             HtmConfig cfg = GetHtmConfig(inputBits, numColumns);
 
@@ -108,194 +108,202 @@ namespace LargeLanguageModel2
 
             int cycle = 0;
             int matches = 0;
-            int maxCycles = 3500;
+            int maxCycles = 300;
 
             //
             // Training SP to get stable. New-born stage.
             //
 
-            for (int i = 0; i < maxCycles && isInStableState == false; i++)
+            using (StreamWriter writeLogs = new StreamWriter(logFile))
             {
-                cycle++;
-
-                logs.Add($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                Debug.WriteLine($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                Console.WriteLine($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-
-                foreach (var sequences in multiSequences)
+                for (int i = 0; i < maxCycles && isInStableState == false; i++)
                 {
-                    foreach (var input in sequences.EncodedSequences)
-                    {
-                        Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("",input.SubSequence.ToArray())} --");
+                    cycle++;
 
-                        var lyrOut = layer1.Compute(input.SDR, true);
+                    writeLogs.WriteLine($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Debug.WriteLine($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Console.WriteLine($"-------------- Training SP Newborn Cycle {cycle} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+
+                    foreach (var sequences in multiSequences)
+                    {
+                        foreach (var input in sequences.EncodedSequences)
+                        {
+                            Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence.ToArray())} --");
+
+                            var lyrOut = layer1.Compute(input.SDR, true);
+
+                            if (isInStableState)
+                                break;
+                        }
 
                         if (isInStableState)
                             break;
                     }
-
-                    if (isInStableState)
-                        break;
                 }
-            }
 
-            // Clear all learned patterns in the classifier.
-            cls.ClearState();
+                // Clear all learned patterns in the classifier.
+                cls.ClearState();
 
-            // We activate here the Temporal Memory algorithm.
-            layer1.HtmModules.Add("tm", tm);
-
-            cycle = 0;
-            var lastPredictedValues = new List<string>(new string[] { "0" });
-
-            //
-            // Loop over all sequences.
-            foreach (var sequences in multiSequences)
-            {
-                logs.Add($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                Debug.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                Console.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-
-                int maxPrevInputs = sequences.EncodedSequences.Count - 1;
-
-                List<string> previousInputs = new List<string>();
-
-                previousInputs.Add("-1.0");
-
-                // Set on true if the system has learned the sequence with a maximum acurracy.
-                bool isLearningCompleted = false;
+                // We activate here the Temporal Memory algorithm.
+                layer1.HtmModules.Add("tm", tm);
 
                 cycle = 0;
+                var lastPredictedValues = new List<string>(new string[] { "0" });
 
                 //
-                // Now training with SP+TM. SP is pretrained on the given input pattern set.
-                for (int i = 0; i < maxCycles; i++)
+                // Loop over all sequences.
+                foreach (var sequences in multiSequences)
                 {
-                    matches = 0;
+                    writeLogs.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Debug.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Console.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
-                    cycle++;
+                    int maxPrevInputs = sequences.EncodedSequences.Count - 1;
 
-                    Debug.WriteLine("");
+                    List<string> previousInputs = new List<string>();
 
-                    logs.Add($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
-                    Debug.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
-                    Console.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
-                    Debug.WriteLine("");
+                    previousInputs.Add("-1.0");
 
-                    foreach (var input in sequences.EncodedSequences)
+                    // Set on true if the system has learned the sequence with a maximum acurracy.
+                    bool isLearningCompleted = false;
+
+                    cycle = 0;
+
+                    //
+                    // Now training with SP+TM. SP is pretrained on the given input pattern set.
+                    for (int i = 0; i < maxCycles; i++)
                     {
-                        Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {input.SubSequence.ToArray().ToString()} --");
+                        matches = 0;
 
-                        var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
+                        cycle++;
 
-                        var activeColumns = layer1.GetResult("sp") as int[];
+                        Debug.WriteLine("");
 
-                        previousInputs.Add(input.EncodedSubSequence.Last().ToString());
-                        if (previousInputs.Count > (maxPrevInputs + 1))
-                            previousInputs.RemoveAt(0);
+                        writeLogs.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
+                        Debug.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
+                        Console.WriteLine($"-------------- Training SP+TM Newborn Cycle {cycle} ---------------");
+                        Debug.WriteLine("");
 
-                        // In the pretrained SP with HPC, the TM will quickly learn cells for patterns
-                        // In that case the starting sequence 4-5-6 might have the sam SDR as 1-2-3-4-5-6,
-                        // Which will result in returning of 4-5-6 instead of 1-2-3-4-5-6.
-                        // HtmClassifier allways return the first matching sequence. Because 4-5-6 will be as first
-                        // memorized, it will match as the first one.
-                        if (previousInputs.Count < maxPrevInputs)
-                            continue;
-
-                        string key = GetKey(previousInputs);
-
-                        /* Get Active Cells */
-                        List<Cell> actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
-
-                        /* Learn the combination of key and Active Cells   key = Sequence of char encoded as number */
-                        cls.Learn(key, actCells.ToArray());
-
-                        //Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
-                        //Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
-
-                        //
-                        // If the list of predicted values from the previous step contains the currently presenting value,
-                        // we have a match.
-                        if (lastPredictedValues.Contains(key))
+                        foreach (var input in sequences.EncodedSequences)
                         {
-                            matches++;
-                            Debug.WriteLine($"Match. Actual value: {key} - Predicted value: {lastPredictedValues.FirstOrDefault(key)}.");
-                        }
-                        else
-                            Debug.WriteLine($"Missmatch! Actual value: {key} - Predicted values: {String.Join(',', lastPredictedValues)}");
+                            Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            writeLogs.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
 
-                        if (lyrOut.PredictiveCells.Count > 0)
-                        {
-                            //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
-                            var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+                            var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
-                            foreach (var item in predictedInputValues)
+                            var activeColumns = layer1.GetResult("sp") as int[];
+
+                            previousInputs.Add(input.EncodedSubSequence.Last().ToString());
+                            if (previousInputs.Count > (maxPrevInputs + 1))
+                                previousInputs.RemoveAt(0);
+
+                            // In the pretrained SP with HPC, the TM will quickly learn cells for patterns
+                            // In that case the starting sequence 4-5-6 might have the sam SDR as 1-2-3-4-5-6,
+                            // Which will result in returning of 4-5-6 instead of 1-2-3-4-5-6.
+                            // HtmClassifier allways return the first matching sequence. Because 4-5-6 will be as first
+                            // memorized, it will match as the first one.
+                            if (previousInputs.Count < maxPrevInputs)
+                                continue;
+
+                            string key = GetKey(previousInputs);
+
+                            /* Get Active Cells */
+                            List<Cell> actCells = (lyrOut.ActiveCells.Count == lyrOut.WinnerCells.Count) ? lyrOut.ActiveCells : lyrOut.WinnerCells;
+
+                            /* Learn the combination of key and Active Cells   key = Sequence of char encoded as number */
+                            cls.Learn(key, actCells.ToArray());
+
+                            //Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
+                            //Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
+
+                            //
+                            // If the list of predicted values from the previous step contains the currently presenting value,
+                            // we have a match.
+                            if (lastPredictedValues.Contains(key))
                             {
-                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
+                                matches++;
+                                Debug.WriteLine($"Match. Actual value: {key} - Predicted value: {lastPredictedValues.FirstOrDefault(key)}.");
                             }
+                            else
+                                Debug.WriteLine($"Missmatch! Actual value: {key} - Predicted values: {String.Join(',', lastPredictedValues)}");
 
-                            lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
+                            if (lyrOut.PredictiveCells.Count > 0)
+                            {
+                                //var predictedInputValue = cls.GetPredictedInputValue(lyrOut.PredictiveCells.ToArray());
+                                var predictedInputValues = cls.GetPredictedInputValues(lyrOut.PredictiveCells.ToArray(), 3);
+
+                                foreach (var item in predictedInputValues)
+                                {
+                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
+                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
+                                }
+
+                                lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
+                                writeLogs.WriteLine($"NO CELLS PREDICTED for next cycle.");
+                                lastPredictedValues = new List<string>();
+                            }
                         }
-                        else
+
+                        // The first element (a single element) in the sequence cannot be predicted
+                        double maxPossibleAccuraccy = (double)((double)sequences.EncodedSequences.Count - 1) / (double)sequences.EncodedSequences.Count * 100.0;
+
+                        double accuracy = (double)matches / (double)sequences.EncodedSequences.Count * 100.0;
+
+                        writeLogs.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
+                        Console.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
+                        Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
+
+                        if (accuracy >= maxPossibleAccuraccy)
                         {
-                            Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
-                            lastPredictedValues = new List<string>();
+                            maxMatchCnt++;
+                            writeLogs.WriteLine($"100% accuracy reached {maxMatchCnt} times.");
+                            Console.WriteLine($"100% accuracy reached {maxMatchCnt} times.");
+                            Debug.WriteLine($"100% accuracy reached {maxMatchCnt} times.");
+
+                            //
+                            // Experiment is completed if we are 30 cycles long at the 100% accuracy.
+                            if (maxMatchCnt >= 30)
+                            {
+                                writeLogs.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
+                                Console.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
+                                Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
+                                isLearningCompleted = true;
+                                break;
+                            }
                         }
-                    }
-
-                    // The first element (a single element) in the sequence cannot be predicted
-                    double maxPossibleAccuraccy = (double)((double)sequences.EncodedSequences.Count - 1) / (double)sequences.EncodedSequences.Count * 100.0;
-
-                    double accuracy = (double)matches / (double)sequences.EncodedSequences.Count * 100.0;
-
-                    logs.Add($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
-                    Console.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
-                    Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {sequences.EncodedSequences.Count}\t {accuracy}%");
-
-                    if (accuracy >= maxPossibleAccuraccy)
-                    {
-                        maxMatchCnt++;
-                        logs.Add($"100% accuracy reched {maxMatchCnt} times.");
-                        Console.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
-                        Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
-
-                        //
-                        // Experiment is completed if we are 30 cycles long at the 100% accuracy.
-                        if (maxMatchCnt >= 30)
+                        else if (maxMatchCnt > 0)
                         {
-                            logs.Add($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
-                            Console.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
-                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequences.Name} learning time: {sw.Elapsed}.");
-                            isLearningCompleted = true;
-                            break;
+                            writeLogs.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                            Console.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                            Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                            maxMatchCnt = 0;
                         }
-                    }
-                    else if (maxMatchCnt > 0)
-                    {
-                        logs.Add($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
-                        Console.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
-                        Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
-                        maxMatchCnt = 0;
+
+                        // This resets the learned state, so the first element starts allways from the beginning.
+                        tm.Reset(mem);
                     }
 
-                    // This resets the learned state, so the first element starts allways from the beginning.
-                    tm.Reset(mem);
+                    if (isLearningCompleted == false)
+                    {
+                        //throw new Exception($"The system didn't learn with expected acurracy!"); 
+                        writeLogs.WriteLine($"The system didn't learn with expected acurracy!");
+                    }
                 }
 
-                if (isLearningCompleted == false)
-                    throw new Exception($"The system didn't learn with expected acurracy!");
+                sw.Stop();
+                Console.WriteLine("-----------------TRAINING END------------------------");
+                Debug.WriteLine("-----------------TRAINING END------------------------");
+                string timespend = $"Training Time : {sw.Elapsed}";
+                Console.WriteLine(timespend);
+                writeLogs.WriteLine(timespend);
+
+                writeLogs.WriteLine("-----------------Learning completed------------------------");
             }
-
-            sw.Stop();
-            Console.WriteLine("-----------------TRAINING END------------------------");
-            Debug.WriteLine("-----------------TRAINING END------------------------");
-            string timespend = $"Training Time : {sw.Elapsed}";
-            Console.WriteLine(timespend);
-            logs.Add(timespend);
-
-            logs.Add("-----------------Learning completed------------------------");
-
-            WriteLogs(OutputPath, logs);
+            //WriteLogs(OutputPath, logs);
 
             return new Predictor(layer1, mem, cls);
         }
@@ -376,6 +384,8 @@ namespace LargeLanguageModel2
                 }
                 predictedValuesList.Add(predictedValues);
             }
+
+            accuracy = matchedPredictions/ totalPrediction * 100;
 
             return predictedValuesList;
 

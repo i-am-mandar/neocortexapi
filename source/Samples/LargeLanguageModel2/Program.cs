@@ -51,7 +51,7 @@ namespace LargeLanguageModel
             Console.WriteLine("Encoding all words in sequence done...");
 
             Console.WriteLine("Split sequences...");
-            (var tainSequences, var testSequences) = LLMCharHelperMethods.SplitSequence(encodedSequence);
+            (var trainSequences, var testSequences) = LLMCharHelperMethods.SplitSequence(encodedSequence);
             Console.WriteLine("Split sequences done...");
 
             //train in parallel => this is not implement
@@ -59,7 +59,7 @@ namespace LargeLanguageModel
             Console.WriteLine("Running Multisequence Learning experiment");
             int inputBits = LLMCharHelperMethods.GetInputBits(charEncoder);
             MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
-            var model = multiSequenceLearning.Run(tainSequences, tokens, inputBits);
+            var model = multiSequenceLearning.Run(trainSequences, tokens, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
 
             // decoding/reverse mapping the predicted values
