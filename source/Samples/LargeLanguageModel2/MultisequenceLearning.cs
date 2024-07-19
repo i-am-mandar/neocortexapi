@@ -109,6 +109,9 @@ namespace LargeLanguageModel2
             int cycle = 0;
             int matches = 0;
             int maxCycles = 300;
+            int sequenceCounter = 0;
+            int totalSequences = multiSequences.Count();
+
 
             //
             // Training SP to get stable. New-born stage.
@@ -116,6 +119,10 @@ namespace LargeLanguageModel2
 
             using (StreamWriter writeLogs = new StreamWriter(logFile))
             {
+                writeLogs.WriteLine($"-------------- Number of sequences: {totalSequences}---------------");
+                writeLogs.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Console.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Debug.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 for (int i = 0; i < maxCycles && isInStableState == false; i++)
                 {
                     cycle++;
@@ -140,7 +147,9 @@ namespace LargeLanguageModel2
                             break;
                     }
                 }
-
+                writeLogs.WriteLine($"-------------- Training SP Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Console.WriteLine($"-------------- Training SP Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Debug.WriteLine($"-------------- Training SP Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 // Clear all learned patterns in the classifier.
                 cls.ClearState();
 
@@ -149,14 +158,19 @@ namespace LargeLanguageModel2
 
                 cycle = 0;
                 var lastPredictedValues = new List<string>(new string[] { "0" });
+                
 
+                writeLogs.WriteLine($"-------------- Training SP+TM Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Console.WriteLine($"-------------- Training SP+TM Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Debug.WriteLine($"-------------- Training SP+TM Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 //
                 // Loop over all sequences.
                 foreach (var sequences in multiSequences)
                 {
-                    writeLogs.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                    Debug.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                    Console.WriteLine($"-------------- Training Sequence Number: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    sequenceCounter++;
+                    writeLogs.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Debug.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Console.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
                     int maxPrevInputs = sequences.EncodedSequences.Count - 1;
 
@@ -186,8 +200,8 @@ namespace LargeLanguageModel2
 
                         foreach (var input in sequences.EncodedSequences)
                         {
-                            Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
-                            writeLogs.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            Debug.WriteLine($"-- SubSequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            writeLogs.WriteLine($"-- SubSequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
 
                             var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
@@ -293,6 +307,9 @@ namespace LargeLanguageModel2
                         writeLogs.WriteLine($"The system didn't learn with expected acurracy!");
                     }
                 }
+                writeLogs.WriteLine($"-------------- Training SP+TM Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Console.WriteLine($"-------------- Training SP+TM Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                Debug.WriteLine($"-------------- Training SP+TM Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
                 sw.Stop();
                 Console.WriteLine("-----------------TRAINING END------------------------");
@@ -457,8 +474,7 @@ namespace LargeLanguageModel2
                 MaxSynapsesPerSegment = (int)(0.02 * numColumns),
 
                 ActivationThreshold = 15,
-                ConnectedPermanence = 0.5,
-
+                SynPermConnected = 0.5,
                 // Learning is slower than forgetting in this case.
                 PermanenceDecrement = 0.25,
                 PermanenceIncrement = 0.15,
