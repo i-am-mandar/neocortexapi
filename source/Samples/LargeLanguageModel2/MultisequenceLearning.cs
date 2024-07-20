@@ -136,9 +136,10 @@ namespace LargeLanguageModel2
 
                     foreach (var sequences in multiSequences)
                     {
+                        Debug.WriteLine($"-+- Sequence: {sequences.Name} -+-");
                         foreach (var input in sequences.EncodedSequences)
                         {
-                            Debug.WriteLine($"-- Sequence: {sequences.Name} - Input: {string.Join("", input.SubSequence.ToArray())} --");
+                            Debug.WriteLine($"-- Sequence: {input.Name} - Input: {string.Join("", input.SubSequence.ToArray())} --");
 
                             var lyrOut = layer1.Compute(input.SDR, true);
 
@@ -161,7 +162,7 @@ namespace LargeLanguageModel2
 
                 cycle = 0;
                 var lastPredictedValues = new List<string>(new string[] { "0" });
-                
+
 
                 writeLogs.WriteLine($"-------------- Training SP+TM Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 Console.WriteLine($"-------------- Training SP+TM Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
@@ -251,8 +252,8 @@ namespace LargeLanguageModel2
 
                                 foreach (var item in predictedInputValues)
                                 {
-                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
-                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - {item.Similarity}");
+                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
+                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
                                 }
 
                                 lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
@@ -332,60 +333,57 @@ namespace LargeLanguageModel2
         /// Runs the Prediction on model learned from Multisequence Learning algorithm for the experiment
         /// </summary>
         /// <param name="model"></param>
-        /// <param name="corpus"></param>
+        /// <param name="tokens"></param>
         /// <param name="testSequences"></param>
         /// <param name="wordEncoder"></param>
-        /// <returns></returns>
-        public List<List<string>> RunPrediction(Predictor model, Token tokens, List<EncodedMultisequence> testSequences, ScalarEncoder wordEncoder)
+        /// <returns>accuracy</returns>
+        public double RunPrediction(Predictor model, Token tokens, List<EncodedMultisequence> testSequences, ScalarEncoder wordEncoder)
         {
-            //List<EncodedMultisequence> encodedTestSequences = LLMCharHelperMethods.GetEncodedSequence(testSequences, corpus, wordEncoder);
-            List<List<string>>? predictedValuesList = new List<List<string>>();
-
-
             int totalPrediction = 0;
             int matchedPredictions = 0;
             int noPredictions = 0;
             double accuracy = 0.0;
-            bool first = true;
-            EncodedSequence prev = new EncodedSequence(); // initialize with null
-            EncodedSequence next = new EncodedSequence(); // initialize with null
+            int sequenceCounter = 0;
+            int totalSequences = testSequences.Count;
 
-            foreach (EncodedMultisequence encodedMultisequence in testSequences)
+            using (StreamWriter writeLogs = new StreamWriter(OutputPath, append: true))
             {
-                model.Reset();
-                List<string>? predictedValues = new List<string>();
-                Console.WriteLine("-----------------------");
-                foreach (EncodedSequence encodedSequence in encodedMultisequence.EncodedSequences)
+                foreach (var sequences in testSequences)
                 {
-                    next = encodedSequence;
-                    if (first)
+                    model.Reset();
+                    writeLogs.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
+                    Console.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
+                    Debug.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
+                    foreach (var input in sequences.EncodedSequences)
                     {
-                        first = false;
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Sequence: {prev.Name} Test Input: {string.Join("",prev.SubSequence)}");
-                        var predictedValuesForInput = model.Predict(prev.SDR);
+                        writeLogs.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
+                        Console.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
+                        Debug.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
+                        var predictedValuesForInput = model.Predict(input.SDR);
                         if (predictedValuesForInput.Count > 0)
                         {
                             int i = 0;
                             foreach (var predictedVal in predictedValuesForInput)
                             {
                                 i++;
-                                //var pSequence = predictedVal.PredictedInput.Split('_').First();
+                                var prediction = predictedVal.PredictedInput.Split('-').SkipLast(1);
                                 var pCharKey = predictedVal.PredictedInput.Split('-').Last();
+                                var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens);
 
-                                // decode the predicted work key and find actual word from corpus
+                                writeLogs.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                                Console.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                                Debug.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
 
-                                string pVal = $"Input: {string.Join("", prev.SubSequence)} - Ouput: {pCharKey}|{LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens)} - SIMILARITY: {predictedVal.Similarity}";
-                                predictedValues.Add(pVal);
-
-                                Console.WriteLine($"{pVal}");
-
-                                if (((int)next.SubSequence.Last()) == Int32.Parse(pCharKey))
+                                writeLogs.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
+                                Console.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
+                                Debug.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
+                                
+                                if (((int)input.NextChar) == Int32.Parse(pCharKey))
                                 {
                                     matchedPredictions++;
-                                    Console.WriteLine($"{i} Perfect match for predicted song!");
+                                    writeLogs.WriteLine($"{i} Perfect match for predicted input!");
+                                    Console.WriteLine($"{i} Perfect match for predicted input!");
+                                    Debug.WriteLine($"{i} Perfect match for predicted input!");
                                     break;
                                 }
 
@@ -396,26 +394,17 @@ namespace LargeLanguageModel2
                         {
                             Console.WriteLine("Nothing predicted :(");
                             noPredictions++;
-                            //totalPrediction++;
                         }
                     }
-
-                    prev = next;
                 }
-                predictedValuesList.Add(predictedValues);
+
+                accuracy = matchedPredictions / totalPrediction * 100;
+                writeLogs.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}%");
+                Console.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}%");
+                Debug.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}%");
             }
 
-            accuracy = matchedPredictions/ totalPrediction * 100;
-            List<string> accuracyData = new List<string>();
-            accuracyData.Add($"Matched Predictions: {matchedPredictions}");
-            accuracyData.Add($"Total Predictions: {totalPrediction}");
-            accuracyData.Add($"Accuracy: {accuracy}%");
-            
-            predictedValuesList.Add(accuracyData);
-
-            WritePredictonLogs(OutputPath, predictedValuesList);
-
-            return predictedValuesList;
+            return accuracy;
 
         }
 

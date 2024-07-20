@@ -70,8 +70,10 @@ namespace LargeLanguageModel
 
             // decoding/reverse mapping the predicted values
             Console.WriteLine("Decoding Predictions");
-            var logs = multiSequenceLearning.RunPrediction(model, tokens, testSequences, charEncoder);
+            var accuracy = multiSequenceLearning.RunPrediction(model, tokens, testSequences, charEncoder);
             Console.WriteLine("Completed Predictions");
+
+            Console.WriteLine($"Final Accuracy: {accuracy}");
             
         }
     }
