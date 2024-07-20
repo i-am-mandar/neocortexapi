@@ -56,17 +56,17 @@ namespace LargeLanguageModel
 
             MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
 
-            Console.WriteLine("Save sequences...");
-            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", trainSequences);
-            var testDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "test", trainSequences);
-            var tokenFilePath = LLMCharHelperMethods.SaveToken(multiSequenceLearning.OutputPath, tokens);
-            Console.WriteLine("Save sequences done...");
-
             //train in parallel => this is not implement
             Console.WriteLine("Running Multisequence Learning experiment");
             int inputBits = LLMCharHelperMethods.GetInputBits(charEncoder);
             var model = multiSequenceLearning.Run(trainSequences, tokens, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
+
+            Console.WriteLine("Save sequences...");
+            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", trainSequences);
+            var testDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "test", trainSequences);
+            var tokenFilePath = LLMCharHelperMethods.SaveToken(multiSequenceLearning.OutputPath, tokens);
+            Console.WriteLine("Save sequences done...");
 
             // decoding/reverse mapping the predicted values
             Console.WriteLine("Decoding Predictions");
