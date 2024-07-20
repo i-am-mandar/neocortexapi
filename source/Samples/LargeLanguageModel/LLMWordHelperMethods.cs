@@ -207,9 +207,9 @@ namespace LargeLanguageModel
         /// <returns></returns>
         public static ScalarEncoder GetWordEncoder(Corpus db)
         {
-            int size = 3;
+            int size = 15;
             
-            ScalarEncoder wordEncoder = GetScalarEncoder(size, UNIQUE_WORD - db.Word.Count, UNIQUE_WORD, "Word");
+            ScalarEncoder wordEncoder = GetScalarEncoder(size, db.Word.First().Value, db.Word.Last().Value, "Word");
 
             return wordEncoder;
         }
@@ -284,6 +284,28 @@ namespace LargeLanguageModel
                 value = 0;
                 return value;
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyValuePairs"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string GetKeyByValue(SortedDictionary<string, int> keyValuePairs, int value)
+        {
+            string key = string.Empty;
+
+            foreach (var kv in keyValuePairs)
+            {
+                if (kv.Value == value)
+                {
+                    key = kv.Key;
+                    break;
+                }
+            }
+
+            return key;
         }
 
         /// <summary>
