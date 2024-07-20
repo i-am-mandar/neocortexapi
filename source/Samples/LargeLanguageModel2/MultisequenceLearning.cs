@@ -356,9 +356,9 @@ namespace LargeLanguageModel2
                     Debug.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
                     foreach (var input in sequences.EncodedSequences)
                     {
-                        writeLogs.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
-                        Console.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
-                        Debug.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~{input.NextChar}--");
+                        writeLogs.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~ NextChar: {input.NextChar}--");
+                        Console.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~ NextChar: {input.NextChar}--");
+                        Debug.WriteLine($"-- SubSequence: {input.Name} Test Input: {string.Join("-", input.SubSequence)}~ NextChar: {input.NextChar}--");
                         var predictedValuesForInput = model.Predict(input.SDR);
                         if (predictedValuesForInput.Count > 0)
                         {
@@ -375,9 +375,9 @@ namespace LargeLanguageModel2
                                 Console.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
                                 Debug.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
 
-                                writeLogs.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
-                                Console.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
-                                Debug.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
+                                writeLogs.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
+                                Console.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
+                                Debug.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
                                 
                                 if (CharKey == Int32.Parse(pCharKey))
                                 {
