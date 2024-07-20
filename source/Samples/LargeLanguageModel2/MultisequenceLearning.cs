@@ -362,7 +362,7 @@ namespace LargeLanguageModel2
                     else
                     {
                         Console.WriteLine($"Sequence: {encodedSequence.Name} Test Input: {string.Join("",prev.SubSequence)}");
-                        var predictedValuesForInput = model.Predict((double)prev.NextChar);
+                        var predictedValuesForInput = model.Predict(prev.SDR);
                         if (predictedValuesForInput.Count > 0)
                         {
                             int i = 0;
