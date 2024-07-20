@@ -361,7 +361,7 @@ namespace LargeLanguageModel2
                     }
                     else
                     {
-                        Console.WriteLine($"Sequence: {encodedSequence.Name} Test Input: {string.Join("",prev.SubSequence)}");
+                        Console.WriteLine($"Sequence: {prev.Name} Test Input: {string.Join("",prev.SubSequence)}");
                         var predictedValuesForInput = model.Predict(prev.SDR);
                         if (predictedValuesForInput.Count > 0)
                         {
@@ -403,6 +403,14 @@ namespace LargeLanguageModel2
             }
 
             accuracy = matchedPredictions/ totalPrediction * 100;
+            List<string> accuracyData = new List<string>();
+            accuracyData.Add($"Matched Predictions: {matchedPredictions}");
+            accuracyData.Add($"Total Predictions: {totalPrediction}");
+            accuracyData.Add($"Accuracy: {accuracy}%");
+            
+            predictedValuesList.Add(accuracyData);
+
+            WritePredictonLogs(OutputPath, predictedValuesList);
 
             return predictedValuesList;
 
@@ -516,16 +524,17 @@ namespace LargeLanguageModel2
         /// </summary>
         /// <param name="filePath">full path of log</param>
         /// <param name="logs">logs to be written</param>
-        public static void WriteLogs(string filePath, List<string> logs)
+        public void WritePredictonLogs(string filePath, List<List<string>> logs)
         {
-            File.AppendAllLines(filePath, logs);
+            foreach (var log in logs)
+            { File.AppendAllLines(filePath, log); }
         }
 
         /// <summary>
         /// Create a unique file name for writing logs
         /// </summary>
         /// <returns>returns name of log file</returns>
-        public static string GetLogFile()
+        public string GetLogFile()
         {
             string BasePath = AppDomain.CurrentDomain.BaseDirectory;
             string reportFolder = Path.Combine(BasePath, "report");

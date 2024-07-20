@@ -295,12 +295,39 @@ namespace LargeLanguageModel2
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keyValuePairs"></param>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static char GetKeyByValue(SortedDictionary<char, int> keyValuePairs, int key)
+        {
+            char value = '\0';
+
+            //
+            //keyValuePairs.Try
+
+            return value;
+        }
+
+        /// <summary>
+        /// Wrapper function for GetValueByID()
+        /// </summary>
+        /// <param name="nextChar"></param>
+        /// <param name="tokens"></param>
+        /// <returns></returns>
+        private static int GetDecodedChar(int encodedChar, Token tokens)
+        {
+            return GetKeyByValue(tokens.Char, encodedChar);
+        }
+
+        /// <summary>
         /// Get value from a dictonary wrt to key
         /// </summary>
         /// <param name="keyValuePairs">Dictionary of data</param>
         /// <param name="key">key of the value to be fetched</param>
         /// <returns>value of the key in interger</returns>
-        private static int GetValueByID(SortedDictionary<char, int> keyValuePairs, char key)
+        private static int GetValueByKey(SortedDictionary<char, int> keyValuePairs, char key)
         {
             int value = 0;
             
@@ -319,12 +346,12 @@ namespace LargeLanguageModel2
         /// <summary>
         /// Wrapper function for GetValueByID()
         /// </summary>
-        /// <param name="nextChar"></param>
+        /// <param name="Char"></param>
         /// <param name="tokens"></param>
         /// <returns></returns>
-        private static int GetEncodedChar(char nextChar, Token tokens)
+        private static int GetEncodedChar(char Char, Token tokens)
         {
-            return GetValueByID(tokens.Char, nextChar);
+            return GetValueByKey(tokens.Char, Char);
         }
 
         /// <summary>
