@@ -368,6 +368,7 @@ namespace LargeLanguageModel2
                                 i++;
                                 var prediction = predictedVal.PredictedInput.Split('-').SkipLast(1);
                                 var pCharKey = predictedVal.PredictedInput.Split('-').Last();
+                                var CharKey = LLMCharHelperMethods.GetEncodedChar(input.NextChar, tokens);
                                 var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens);
 
                                 writeLogs.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
@@ -378,7 +379,7 @@ namespace LargeLanguageModel2
                                 Console.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
                                 Debug.WriteLine($"Test Input: {string.Join("-", input.SubSequence)} ~ Predicted NextChar: {pChar} - SIMILARITY: {predictedVal.Similarity}");
                                 
-                                if (((int)input.NextChar) == Int32.Parse(pCharKey))
+                                if (CharKey == Int32.Parse(pCharKey))
                                 {
                                     matchedPredictions++;
                                     writeLogs.WriteLine($"{i} Perfect match for predicted input!");
