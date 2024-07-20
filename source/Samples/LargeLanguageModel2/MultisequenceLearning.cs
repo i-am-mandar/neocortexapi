@@ -20,6 +20,11 @@ namespace LargeLanguageModel2
     {
         public string OutputPath { get; set; }
 
+        public MultiSequenceLearning()
+        {
+            OutputPath = GetLogFile();
+        }
+
         /// <summary>
         /// Runs the learning of sequences and create a trained model
         /// </summary>
@@ -96,10 +101,6 @@ namespace LargeLanguageModel2
             /* already encoeded data so no need to encode again */
             layer1.HtmModules.Add("sp", sp);
 
-            //file for saving logs
-            string logFile = GetLogFile();
-            OutputPath = logFile;
-
             //list for logs
             List<string> logs = new List<string>();
 
@@ -117,9 +118,11 @@ namespace LargeLanguageModel2
             // Training SP to get stable. New-born stage.
             //
 
-            using (StreamWriter writeLogs = new StreamWriter(logFile))
+            using (StreamWriter writeLogs = new StreamWriter(OutputPath, append: true))
             {
                 writeLogs.WriteLine($"-------------- Number of sequences: {totalSequences}---------------");
+                Console.WriteLine($"-------------- Number of sequences: {totalSequences}---------------");
+                Debug.WriteLine($"-------------- Number of sequences: {totalSequences}---------------");
                 writeLogs.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 Console.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
                 Debug.WriteLine($"-------------- Training SP Starts - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
@@ -168,9 +171,9 @@ namespace LargeLanguageModel2
                 foreach (var sequences in multiSequences)
                 {
                     sequenceCounter++;
-                    writeLogs.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                    Debug.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
-                    Console.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    writeLogs.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Debug.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
+                    Console.WriteLine($"-------------- Training Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
                     int maxPrevInputs = sequences.EncodedSequences.Count - 1;
 
@@ -200,8 +203,8 @@ namespace LargeLanguageModel2
 
                         foreach (var input in sequences.EncodedSequences)
                         {
-                            Debug.WriteLine($"-- SubSequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
-                            writeLogs.WriteLine($"-- SubSequence: {sequences.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            Debug.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            writeLogs.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
 
                             var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
@@ -333,7 +336,7 @@ namespace LargeLanguageModel2
         /// <param name="testSequences"></param>
         /// <param name="wordEncoder"></param>
         /// <returns></returns>
-        public List<List<string>> RunPrediction(Predictor model, Token corpus, List<EncodedMultisequence> testSequences, ScalarEncoder wordEncoder)
+        public List<List<string>> RunPrediction(Predictor model, Token tokens, List<EncodedMultisequence> testSequences, ScalarEncoder wordEncoder)
         {
             //List<EncodedMultisequence> encodedTestSequences = LLMCharHelperMethods.GetEncodedSequence(testSequences, corpus, wordEncoder);
             List<List<string>>? predictedValuesList = new List<List<string>>();
@@ -374,7 +377,7 @@ namespace LargeLanguageModel2
 
                                 // decode the predicted work key and find actual word from corpus
 
-                                string pVal = $"Input: {string.Join("", prev.SubSequence)} Ouput: {pCharKey} - SIMILARITY: {predictedVal.Similarity}";
+                                string pVal = $"Input: {string.Join("", prev.SubSequence)} - Ouput: {pCharKey}|{LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens)} - SIMILARITY: {predictedVal.Similarity}";
                                 predictedValues.Add(pVal);
 
                                 Console.WriteLine($"{pVal}");
@@ -542,7 +545,7 @@ namespace LargeLanguageModel2
                 Directory.CreateDirectory(reportFolder);
 
             var ticks = DateTime.Now.Ticks;
-            string reportPath = Path.Combine(reportFolder, $"reports_{ticks}.txt");
+            string reportPath = Path.Combine(reportFolder, $"{ticks}_reports.txt");
 
             if (!File.Exists(reportPath))
             {

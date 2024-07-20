@@ -54,15 +54,17 @@ namespace LargeLanguageModel
             (var trainSequences, var testSequences) = LLMCharHelperMethods.SplitSequence(encodedSequence);
             Console.WriteLine("Split sequences done...");
 
+            MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
+
             Console.WriteLine("Save sequences...");
-            //needs implementation
+            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", trainSequences);
+            var testDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "test", trainSequences);
+            var tokenFilePath = LLMCharHelperMethods.SaveToken(multiSequenceLearning.OutputPath, tokens);
             Console.WriteLine("Save sequences done...");
 
             //train in parallel => this is not implement
-            //start learning the model and lets see how it goes - to do
             Console.WriteLine("Running Multisequence Learning experiment");
             int inputBits = LLMCharHelperMethods.GetInputBits(charEncoder);
-            MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
             var model = multiSequenceLearning.Run(trainSequences, tokens, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
 

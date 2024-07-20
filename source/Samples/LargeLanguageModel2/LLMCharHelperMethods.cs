@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NeoCortexApi.Encoders;
+using Org.BouncyCastle.Utilities;
 
 namespace LargeLanguageModel2
 {
@@ -298,25 +299,31 @@ namespace LargeLanguageModel2
         /// 
         /// </summary>
         /// <param name="keyValuePairs"></param>
-        /// <param name="key"></param>
+        /// <param name="value"></param>
         /// <returns></returns>
-        public static char GetKeyByValue(SortedDictionary<char, int> keyValuePairs, int key)
+        public static char GetKeyByValue(SortedDictionary<char, int> keyValuePairs, int value)
         {
-            char value = '\0';
+            char key = '\0';
 
-            //
-            //keyValuePairs.Try
+            foreach(var kv in keyValuePairs)
+            {
+                if (kv.Value == value)
+                {
+                    key = kv.Key;
+                    break;
+                }
+            }
 
-            return value;
+            return key;
         }
 
         /// <summary>
-        /// Wrapper function for GetValueByID()
+        /// Wrapper function for GetKeyByValue()
         /// </summary>
-        /// <param name="nextChar"></param>
+        /// <param name="encodedChar"></param>
         /// <param name="tokens"></param>
         /// <returns></returns>
-        private static int GetDecodedChar(int encodedChar, Token tokens)
+        public static char GetDecodedChar(int encodedChar, Token tokens)
         {
             return GetKeyByValue(tokens.Char, encodedChar);
         }
@@ -349,7 +356,7 @@ namespace LargeLanguageModel2
         /// <param name="Char"></param>
         /// <param name="tokens"></param>
         /// <returns></returns>
-        private static int GetEncodedChar(char Char, Token tokens)
+        public static int GetEncodedChar(char Char, Token tokens)
         {
             return GetValueByKey(tokens.Char, Char);
         }
@@ -384,6 +391,65 @@ namespace LargeLanguageModel2
             testSequences.AddRange(shuffledSequence[trainSize..]);
 
             return (trainSequences, testSequences);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outputPath"></param>
+        /// <param name="trainSequences"></param>
+        /// <returns></returns>
+        public static string SaveSequences(string outputPath, string fileName, List<EncodedMultisequence> sequences)
+        {
+            string datasetPath = outputPath.Replace("reports", fileName);
+            var ticks = DateTime.Now.Ticks;
+
+            if (!File.Exists(datasetPath))
+            {
+                using (StreamWriter sw = File.CreateText(datasetPath))
+                {
+                    sw.WriteLine($"Dataset file created at {ticks}...");
+                    foreach (var sequence in sequences)
+                    {
+                        sw.WriteLine("--------------------------------");
+                        sw.WriteLine($"Name: {sequence.Name}");
+                        foreach(var subsequence in sequence.EncodedSequences)
+                        {
+                            sw.WriteLine($"\t{subsequence.Name}\t|{string.Join("", subsequence.SubSequence)}-{subsequence.NextChar}");
+                        }
+                    }
+                }
+            }
+
+            return datasetPath;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="outputPath"></param>
+        /// <param name="fileName"></param>
+        /// <param name="tk"></param>
+        /// <returns></returns>
+        public static string SaveToken(string outputPath, Token tk)
+        {
+            string tokenFile = outputPath.Replace("reports", "token");
+            var ticks = DateTime.Now.Ticks;
+
+            if (!File.Exists(tokenFile))
+            {
+                using (StreamWriter sw = File.CreateText(tokenFile))
+                {
+                    sw.WriteLine($"Dataset file created at {ticks}...");
+                    sw.WriteLine($"Key\t|Value");
+                    foreach (var kv in tk.Char)
+                    {
+                        sw.WriteLine($"'{kv.Key}'\t|'{kv.Value}'");
+                    }
+                }
+            }
+
+            return tokenFile;
         }
     }
 }
