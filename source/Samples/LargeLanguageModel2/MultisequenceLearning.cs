@@ -204,8 +204,8 @@ namespace LargeLanguageModel2
 
                         foreach (var input in sequences.EncodedSequences)
                         {
-                            Debug.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
-                            writeLogs.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            Debug.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} - NextChar: {input.NextChar} --");
+                            writeLogs.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} - NextChar: {input.NextChar} --");
 
                             var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
@@ -252,8 +252,8 @@ namespace LargeLanguageModel2
 
                                 foreach (var item in predictedInputValues)
                                 {
-                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
-                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
+                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)}~{input.EncodedNextChar} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
+                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)}~{input.EncodedNextChar} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
                                 }
 
                                 lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
@@ -364,10 +364,8 @@ namespace LargeLanguageModel2
                             foreach (var predictedVal in predictedValuesForInput)
                             {
                                 i++;
-                                var prediction = predictedVal.PredictedInput.Split('-').SkipLast(1);
-                                var pCharKey = predictedVal.PredictedInput.Split('-').Last();
-                                var CharKey = LLMCharHelperMethods.GetEncodedChar(input.NextChar, tokens);
-                                var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens);
+                                var pCharValue = predictedVal.PredictedInput.Split('-').Last();
+                                var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharValue), tokens);
 
                                 writeLogs.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
                                 Console.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
@@ -377,7 +375,7 @@ namespace LargeLanguageModel2
                                 Console.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
                                 Debug.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
                                 
-                                if (CharKey == Int32.Parse(pCharKey))
+                                if (input.EncodedNextChar == Int32.Parse(pCharValue))
                                 {
                                     matchedPredictions++;
                                     writeLogs.WriteLine($"\t{i} Perfect match for predicted input!");
