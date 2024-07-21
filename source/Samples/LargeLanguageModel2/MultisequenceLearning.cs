@@ -316,15 +316,12 @@ namespace LargeLanguageModel2
                 Debug.WriteLine($"-------------- Training SP+TM Done - {DateTime.Now.ToString("yyyy-MM-ddTHH:mm:ss.ffffffK")}---------------");
 
                 sw.Stop();
-                Console.WriteLine("-----------------TRAINING END------------------------");
-                Debug.WriteLine("-----------------TRAINING END------------------------");
-                string timespend = $"Training Time : {sw.Elapsed}";
+                string timespend = $"-------------- Total Training Time : {sw.Elapsed} --------------";
                 Console.WriteLine(timespend);
                 writeLogs.WriteLine(timespend);
 
                 writeLogs.WriteLine("-----------------Learning completed------------------------");
             }
-            //WriteLogs(OutputPath, logs);
 
             return new Predictor(layer1, mem, cls);
         }
@@ -350,6 +347,7 @@ namespace LargeLanguageModel2
             {
                 foreach (var sequences in testSequences)
                 {
+                    sequenceCounter++;
                     model.Reset();
                     writeLogs.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
                     Console.WriteLine($"-------------- Test Sequence Number: {sequenceCounter} of {totalSequences} - Name: {sequences.Name} ---------------");
@@ -510,17 +508,6 @@ namespace LargeLanguageModel2
             ScalarEncoder encoder = new ScalarEncoder(settings);
 
             return encoder;
-        }
-
-        /// <summary>
-        /// Write logs in the given file name with full path
-        /// </summary>
-        /// <param name="filePath">full path of log</param>
-        /// <param name="logs">logs to be written</param>
-        public void WritePredictonLogs(string filePath, List<List<string>> logs)
-        {
-            foreach (var log in logs)
-            { File.AppendAllLines(filePath, log); }
         }
 
         /// <summary>
