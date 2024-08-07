@@ -204,8 +204,8 @@ namespace LargeLanguageModel2
 
                         foreach (var input in sequences.EncodedSequences)
                         {
-                            Debug.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
-                            writeLogs.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)} --");
+                            Debug.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)}, Next Char: {input.NextChar} --");
+                            writeLogs.WriteLine($"-- SubSequence: {input.Name} - Input: {string.Join("", input.SubSequence)}, Next Char: {input.NextChar} --");
 
                             var lyrOut = layer1.Compute(input.SDR, true) as ComputeCycle;
 
@@ -252,8 +252,8 @@ namespace LargeLanguageModel2
 
                                 foreach (var item in predictedInputValues)
                                 {
-                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
-                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
+                                    Debug.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)}~{input.EncodedNextChar} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
+                                    writeLogs.WriteLine($"Current Input: {string.Join('-', input.EncodedSubSequence)}~{input.EncodedNextChar} \t| Predicted Input: {item.PredictedInput} - Similarity: {item.Similarity}");
                                 }
 
                                 lastPredictedValues = predictedInputValues.Select(v => v.PredictedInput).ToList();
@@ -399,7 +399,7 @@ namespace LargeLanguageModel2
                     }
                 }
 
-                accuracy = matchedPredictions / totalPrediction * 100;
+                accuracy = (double)matchedPredictions / totalPrediction * 100;
                 writeLogs.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}% \t| No Prediction: {noPredictions}");
                 Console.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}% \t| No Prediction: {noPredictions}");
                 Debug.WriteLine($"Matched Predictions: {matchedPredictions}, Total Predictions: {totalPrediction}, Accuracy: {accuracy}% \t| No Prediction: {noPredictions}");
