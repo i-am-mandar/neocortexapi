@@ -21,60 +21,48 @@ namespace LargeLanguageModel
         static void Main(string[] args)
         {
             bool useMinData = true;
-            bool useMinTestData = useMinData;
 
             string datafile = useMinData ? "input-min-100.txt" : "input.txt";
             Console.WriteLine($"Using datafile: {datafile}");
 
-            Console.WriteLine("Reading datafile...");
-            var words = LLMCharHelperMethods.ReadInput(datafile);
-            Console.WriteLine("Reading datafile done...");
-
             Console.WriteLine("Breaking down chars...");
-            var charsBroken = LLMCharHelperMethods.BreakDownToChar(LLMCharHelperMethods.BreakDownToWords(words));
+            List<char> charsBroken = LLMCharHelperMethods.BreakDownToChar(LLMCharHelperMethods.BreakDownToWords(LLMCharHelperMethods.ReadInput(datafile)));
             Console.WriteLine("Breaking down chars done...");
 
             Console.WriteLine("Filling database...");
-            var tokens = LLMCharHelperMethods.FillTokenDatabase(charsBroken);
+            Token tokens = LLMCharHelperMethods.FillTokenDictonary(charsBroken);
             Console.WriteLine("Filling database done...");
 
             Console.WriteLine("Getting word encoder...");
-            var charEncoder = LLMCharHelperMethods.GetCharEncoder(tokens);
+            ScalarEncoder charEncoder = LLMCharHelperMethods.GetCharEncoder(tokens);
             Console.WriteLine("Getting word encoder done...");
 
             Console.WriteLine("Creating sequences..");
-            var sequences = LLMCharHelperMethods.CreateSequence(charsBroken);
+            Multisequence sequences = LLMCharHelperMethods.CreateSequence(charsBroken);
             Console.WriteLine("Creating sequences done...");
 
             Console.WriteLine("Encoding all words in sequence...");
-            var encodedSequence = LLMCharHelperMethods.GetEncodedSequence(sequences, tokens, charEncoder);
+            List<EncodedMultisequence> encodedSequence = LLMCharHelperMethods.GetEncodedSequence(sequences, tokens, charEncoder);
             Console.WriteLine("Encoding all words in sequence done...");
-
-            Console.WriteLine("Split sequences...");
-            (var trainSequences, var testSequences) = LLMCharHelperMethods.SplitSequence(encodedSequence);
-            Console.WriteLine("Split sequences done...");
 
             MultiSequenceLearning multiSequenceLearning = new MultiSequenceLearning();
 
             //train in parallel => this is not implement
             Console.WriteLine("Running Multisequence Learning experiment");
             int inputBits = LLMCharHelperMethods.GetInputBits(charEncoder);
-            var model = multiSequenceLearning.Run(trainSequences, tokens, inputBits);
+            var model = multiSequenceLearning.Run(encodedSequence, tokens, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
 
             Console.WriteLine("Save sequences...");
-            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", trainSequences);
-            var testDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "test", trainSequences);
+            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", encodedSequence);
             var tokenFilePath = LLMCharHelperMethods.SaveToken(multiSequenceLearning.OutputPath, tokens);
             Console.WriteLine("Save sequences done...");
 
             // decoding/reverse mapping the predicted values
-            Console.WriteLine("Decoding Predictions");
-            var accuracy = multiSequenceLearning.RunPrediction(model, tokens, testSequences, charEncoder);
-            Console.WriteLine("Completed Predictions");
+            Console.WriteLine("Running completion model..");
+            multiSequenceLearning.RunCompletionModel(model, tokens, charEncoder);
+            Console.WriteLine("Running completion model..");
 
-            Console.WriteLine($"Final Accuracy: {accuracy}");
-            
         }
     }
 }

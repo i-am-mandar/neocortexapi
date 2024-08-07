@@ -11,7 +11,7 @@ namespace LargeLanguageModel2
     public class LLMCharHelperMethods
     {
         public static int DEBUG = 2;
-        public static int UNIQUE_WORD = 1;
+        public static int UNIQUE_CHAR = 1;
         public static int TOKEN_SIZE = 8;
         public static double OVERLAP_SIZE = 0.50;
         public static double SPLIT_SIZE = 0.1;
@@ -123,7 +123,7 @@ namespace LargeLanguageModel2
         /// </summary>
         /// <param name="charsBroken"></param>
         /// <returns></returns>
-        public static Token FillTokenDatabase(List<char> charsBroken)
+        public static Token FillTokenDictonary(List<char> charsBroken)
         {
             int count = 0;
             Token db = new Token();
@@ -145,7 +145,7 @@ namespace LargeLanguageModel2
             SortedDictionary<char, int>.KeyCollection sortedKeys = db.Char.Keys;
             foreach (char key in sortedKeys)
             {
-                dbSorted.Char.Add(key, UNIQUE_WORD++);
+                dbSorted.Char.Add(key, UNIQUE_CHAR++);
             }
 
             return dbSorted;
