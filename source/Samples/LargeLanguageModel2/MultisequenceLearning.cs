@@ -3,10 +3,12 @@ using NeoCortexApi.Classifiers;
 using NeoCortexApi.Encoders;
 using NeoCortexApi.Entities;
 using NeoCortexApi.Network;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -29,10 +31,10 @@ namespace LargeLanguageModel2
         /// Runs the learning of sequences and create a trained model
         /// </summary>
         /// <param name="multiSequences"></param>
-        /// <param name="db"></param>
+        /// <param name="tk"></param>
         /// <param name="inputBits"></param>
         /// <returns>Object of Predictor class which is trained model</returns>
-        public Predictor Run(List<EncodedMultisequence> multiSequences, Token db, int inputBits)
+        public Predictor Run(List<EncodedMultisequence> multiSequences, Token tk, int inputBits)
         {
             Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(MultiSequenceLearning)}");
 
@@ -41,7 +43,7 @@ namespace LargeLanguageModel2
             HtmConfig cfg = GetHtmConfig(inputBits, numColumns);
 
 
-            return RunExperiment(inputBits, cfg, multiSequences);
+            return RunExperiment(inputBits, cfg, multiSequences, tk);
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace LargeLanguageModel2
         /// <param name="multiSequences"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private Predictor RunExperiment(int inputBits, HtmConfig cfg, List<EncodedMultisequence> multiSequences)
+        private Predictor RunExperiment(int inputBits, HtmConfig cfg, List<EncodedMultisequence> multiSequences, Token tk)
         {
             Stopwatch sw = new Stopwatch();
             sw.Start();
@@ -323,7 +325,80 @@ namespace LargeLanguageModel2
                 writeLogs.WriteLine("-----------------Learning completed------------------------");
             }
 
+            Console.WriteLine("Save sequences...");
+            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(OutputPath, "train", multiSequences);
+            var tokenFilePath = LLMCharHelperMethods.SaveToken(OutputPath, tk);
+            Console.WriteLine("Save sequences done...");
+
             return new Predictor(layer1, mem, cls);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="tokens"></param>
+        /// <param name="wordEncoder"></param>
+        public void RunCompletionModel(Predictor model, Token tokens, ScalarEncoder wordEncoder)
+        {
+            // number of char to be predicted
+            int predictFor = LLMCharHelperMethods.UNIQUE_CHAR / 20;
+
+            // generate a random char from tokens
+            Random random = new Random();
+            int nextInt = random.Next(1, LLMCharHelperMethods.UNIQUE_CHAR);
+            char nextChar = LLMCharHelperMethods.GetDecodedChar(nextInt, tokens);
+
+            // encode the first random input
+            int[] SDR = wordEncoder.Encode(nextInt);
+
+            List<char> completionText = new List<char>();
+            completionText.Add(nextChar);
+
+            using (StreamWriter writeLogs = new StreamWriter(OutputPath, append: true))
+            {
+                writeLogs.WriteLine($"Starting completion model with char to start predicting: {nextChar} for {predictFor} chars");
+                Console.WriteLine($"Starting completion model with char to start predicting: {nextChar} for {predictFor} chars");
+                Debug.WriteLine($"Starting completion model with char to start predicting: {nextChar} for {predictFor} chars");
+                for(int i = 0; i < predictFor; i++)
+                {
+                    var predictedValuesForInput = model.Predict(SDR);
+                    if (predictedValuesForInput.Count > 0)
+                    {
+                        // select the predicted value with highest similarity
+                        ClassifierResult<string> predictedVal = predictedValuesForInput.OrderByDescending(item => item.Similarity).First();
+
+                        var pCharValue = predictedVal.PredictedInput.Split('-').Last();
+                        var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharValue), tokens);
+
+                        /*
+                        writeLogs.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        Console.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        Debug.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        */
+                        writeLogs.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
+                        Console.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
+                        Debug.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
+
+                        // update values for next call
+                        nextInt = Int32.Parse(pCharValue);
+                        nextChar = pChar;
+                        SDR = wordEncoder.Encode(nextInt);
+                        completionText.Add(nextChar);
+
+                    }
+                    else
+                    {
+                        writeLogs.WriteLine("\tNothing predicted :(");
+                        Console.WriteLine("\tNothing predicted :(");
+                        Debug.WriteLine("\tNothing predicted :(");
+                        break;
+                    }
+                }
+
+                writeLogs.WriteLine($"Finally predicted: ~{string.Join("", completionText)}~");
+                Console.WriteLine($"Finally predicted: ~{string.Join("", completionText)}~");
+            }
         }
 
         /// <summary>
@@ -364,10 +439,8 @@ namespace LargeLanguageModel2
                             foreach (var predictedVal in predictedValuesForInput)
                             {
                                 i++;
-                                var prediction = predictedVal.PredictedInput.Split('-').SkipLast(1);
-                                var pCharKey = predictedVal.PredictedInput.Split('-').Last();
-                                var CharKey = LLMCharHelperMethods.GetEncodedChar(input.NextChar, tokens);
-                                var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharKey), tokens);
+                                var pCharValue = predictedVal.PredictedInput.Split('-').Last();
+                                var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharValue), tokens);
 
                                 writeLogs.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
                                 Console.WriteLine($"Test Input: {string.Join('-', input.EncodedSubSequence)} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
@@ -377,7 +450,7 @@ namespace LargeLanguageModel2
                                 Console.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
                                 Debug.WriteLine($"\tInput: {string.Join("-", input.SubSequence)}~ Predicted NextChar: {pChar}");
                                 
-                                if (CharKey == Int32.Parse(pCharKey))
+                                if (input.EncodedNextChar == Int32.Parse(pCharValue))
                                 {
                                     matchedPredictions++;
                                     writeLogs.WriteLine($"\t{i} Perfect match for predicted input!");
