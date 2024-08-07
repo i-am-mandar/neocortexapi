@@ -53,11 +53,6 @@ namespace LargeLanguageModel
             var model = multiSequenceLearning.Run(encodedSequence, tokens, inputBits);
             Console.WriteLine("Running Multisequence Learning experiment done...");
 
-            Console.WriteLine("Save sequences...");
-            var trainDatasetFilePath = LLMCharHelperMethods.SaveSequences(multiSequenceLearning.OutputPath, "train", encodedSequence);
-            var tokenFilePath = LLMCharHelperMethods.SaveToken(multiSequenceLearning.OutputPath, tokens);
-            Console.WriteLine("Save sequences done...");
-
             // decoding/reverse mapping the predicted values
             Console.WriteLine("Running completion model..");
             multiSequenceLearning.RunCompletionModel(model, tokens, charEncoder);
