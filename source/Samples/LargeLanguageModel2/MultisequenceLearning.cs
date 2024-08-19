@@ -342,7 +342,7 @@ namespace LargeLanguageModel2
         public void RunCompletionModel(Predictor model, Token tokens, ScalarEncoder wordEncoder)
         {
             // number of char to be predicted
-            int predictFor = LLMCharHelperMethods.UNIQUE_CHAR / 20;
+            int predictFor = LLMCharHelperMethods.UNIQUE_CHAR;
 
             // generate a random char from tokens
             Random random = new Random();
@@ -352,8 +352,9 @@ namespace LargeLanguageModel2
             // encode the first random input
             int[] SDR = wordEncoder.Encode(nextInt);
 
-            List<char> completionText = new List<char>();
-            completionText.Add(nextChar);
+            List<int> completionResult = new List<int>();
+            
+            model.Reset();
 
             using (StreamWriter writeLogs = new StreamWriter(OutputPath, append: true))
             {
@@ -368,37 +369,76 @@ namespace LargeLanguageModel2
                         // select the predicted value with highest similarity
                         ClassifierResult<string> predictedVal = predictedValuesForInput.OrderByDescending(item => item.Similarity).First();
 
-                        var pCharValue = predictedVal.PredictedInput.Split('-').Last();
-                        var pChar = LLMCharHelperMethods.GetDecodedChar(Int32.Parse(pCharValue), tokens);
+                        //save the result as predicted value + completion result
+                        completionResult = FillResult(predictedVal.PredictedInput.Split('-'), completionResult);
 
-                        /*
-                        writeLogs.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
-                        Console.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
-                        Debug.WriteLine($"Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
-                        */
+                        int pIntValue = completionResult.First();
+                        char pChar = LLMCharHelperMethods.GetDecodedChar(pIntValue, tokens);
+
+                        writeLogs.WriteLine($"{i}. Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        Console.WriteLine($"{i}. Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        Debug.WriteLine($"{i}. Test Input: {nextInt} \t| Predicted Input: {predictedVal.PredictedInput} - Similarity: {predictedVal.Similarity} --");
+                        
                         writeLogs.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
                         Console.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
                         Debug.WriteLine($"\tInput: {nextChar}~ Predicted NextChar: {pChar} - Similarity: {predictedVal.Similarity}");
 
                         // update values for next call
-                        nextInt = Int32.Parse(pCharValue);
+                        nextInt = pIntValue;
                         nextChar = pChar;
-                        SDR = wordEncoder.Encode(nextInt);
-                        completionText.Add(nextChar);
-
                     }
                     else
                     {
                         writeLogs.WriteLine("\tNothing predicted :(");
                         Console.WriteLine("\tNothing predicted :(");
                         Debug.WriteLine("\tNothing predicted :(");
-                        break;
+
+                        // generate a random char from tokens
+                        nextInt = random.Next(1, LLMCharHelperMethods.UNIQUE_CHAR);
+                        nextChar = LLMCharHelperMethods.GetDecodedChar(nextInt, tokens);
                     }
+
+                    SDR = wordEncoder.Encode(nextInt);
+                    model.Reset();
                 }
 
-                writeLogs.WriteLine($"Finally predicted: ~{string.Join("", completionText)}~");
-                Console.WriteLine($"Finally predicted: ~{string.Join("", completionText)}~");
+                writeLogs.WriteLine($"Finally Encoded Prediction: ~{string.Join("-", completionResult)}~");
+                Console.WriteLine($"Finally Encoded Prediction: ~{string.Join("-", completionResult)}~");
+
+                List<string> completionText = new List<string>();
+                foreach (int result in completionResult)
+                {
+                    char decodedChar = LLMCharHelperMethods.GetDecodedChar(result, tokens);
+                    completionText.Add(decodedChar.ToString());
+                    Console.WriteLine(decodedChar);
+                }
+
+                writeLogs.WriteLine($"Finally Prediction: ~{string.Join("", completionText)}~");
+                Console.WriteLine($"Finally Prediction: ~{string.Join("", completionText)}~");
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="predictedResult"></param>
+        /// <param name="previousResult"></param>
+        /// <returns></returns>
+        private List<int> FillResult(string[] predictedResult, List<int> previousResult)
+        {
+            List<int> clearPrediction = new List<int>();
+            
+            for (int i = 0; i < predictedResult.Length; i++)
+            {
+                if (predictedResult[i].Equals("1.0") || string.IsNullOrEmpty(predictedResult[i]))
+                    continue;
+                
+                clearPrediction.Add(Int32.Parse(predictedResult[i]));
+            }
+            
+            clearPrediction.AddRange(previousResult);
+
+            return clearPrediction;
         }
 
         /// <summary>
@@ -506,7 +546,6 @@ namespace LargeLanguageModel2
         /// The prediction code can then extract the sequence prefix to the predicted element.
         /// </summary>
         /// <param name="prevInputs"></param>
-        /// <param name="sequence"></param>
         /// <returns></returns>
         private static string GetKey(List<string> prevInputs)
         {
