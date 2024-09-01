@@ -1,0 +1,2320 @@
+Dataset file created at 638598599943336371...
+--------------------------------
+Name: E1
+	S1	|F-i
+	S2	|Fi-r
+	S3	|Fir-s
+	S4	|Firs-t
+	S5	|First- 
+	S6	|First -C
+	S7	|First C-i
+	S8	|First Ci-t
+--------------------------------
+Name: E2
+	S1	| -C
+	S2	| C-i
+	S3	| Ci-t
+	S4	| Cit-i
+	S5	| Citi-z
+	S6	| Citiz-e
+	S7	| Citize-n
+	S8	| Citizen-:
+--------------------------------
+Name: E3
+	S1	|z-e
+	S2	|ze-n
+	S3	|zen-:
+	S4	|zen:-
+
+	S5	|zen:
+-B
+	S6	|zen:
+B-e
+	S7	|zen:
+Be-f
+	S8	|zen:
+Bef-o
+--------------------------------
+Name: E4
+	S1	|B-e
+	S2	|Be-f
+	S3	|Bef-o
+	S4	|Befo-r
+	S5	|Befor-e
+	S6	|Before- 
+	S7	|Before -w
+	S8	|Before w-e
+--------------------------------
+Name: E5
+	S1	|e- 
+	S2	|e -w
+	S3	|e w-e
+	S4	|e we- 
+	S5	|e we -p
+	S6	|e we p-r
+	S7	|e we pr-o
+	S8	|e we pro-c
+--------------------------------
+Name: E6
+	S1	|p-r
+	S2	|pr-o
+	S3	|pro-c
+	S4	|proc-e
+	S5	|proce-e
+	S6	|procee-d
+	S7	|proceed- 
+	S8	|proceed -a
+--------------------------------
+Name: E7
+	S1	|e-d
+	S2	|ed- 
+	S3	|ed -a
+	S4	|ed a-n
+	S5	|ed an-y
+	S6	|ed any- 
+	S7	|ed any -f
+	S8	|ed any f-u
+--------------------------------
+Name: E8
+	S1	|y- 
+	S2	|y -f
+	S3	|y f-u
+	S4	|y fu-r
+	S5	|y fur-t
+	S6	|y furt-h
+	S7	|y furth-e
+	S8	|y furthe-r
+--------------------------------
+Name: E9
+	S1	|t-h
+	S2	|th-e
+	S3	|the-r
+	S4	|ther-,
+	S5	|ther,- 
+	S6	|ther, -h
+	S7	|ther, h-e
+	S8	|ther, he-a
+--------------------------------
+Name: E10
+	S1	| -h
+	S2	| h-e
+	S3	| he-a
+	S4	| hea-r
+	S5	| hear- 
+	S6	| hear -m
+	S7	| hear m-e
+	S8	| hear me- 
+--------------------------------
+Name: E11
+	S1	| -m
+	S2	| m-e
+	S3	| me- 
+	S4	| me -s
+	S5	| me s-p
+	S6	| me sp-e
+	S7	| me spe-a
+	S8	| me spea-k
+--------------------------------
+Name: E12
+	S1	|p-e
+	S2	|pe-a
+	S3	|pea-k
+	S4	|peak-.
+	S5	|peak.-
+
+	S6	|peak.
+-
+
+	S7	|peak.
+
+-A
+	S8	|peak.
+
+A-l
+--------------------------------
+Name: E13
+	S1	|
+-
+
+	S2	|
+
+-A
+	S3	|
+
+A-l
+	S4	|
+
+Al-l
+	S5	|
+
+All-:
+	S6	|
+
+All:-
+
+	S7	|
+
+All:
+-S
+	S8	|
+
+All:
+S-p
+--------------------------------
+Name: E14
+	S1	|:-
+
+	S2	|:
+-S
+	S3	|:
+S-p
+	S4	|:
+Sp-e
+	S5	|:
+Spe-a
+	S6	|:
+Spea-k
+	S7	|:
+Speak-,
+	S8	|:
+Speak,- 
+--------------------------------
+Name: E15
+	S1	|a-k
+	S2	|ak-,
+	S3	|ak,- 
+	S4	|ak, -s
+	S5	|ak, s-p
+	S6	|ak, sp-e
+	S7	|ak, spe-a
+	S8	|ak, spea-k
+--------------------------------
+Name: E16
+	S1	|p-e
+	S2	|pe-a
+	S3	|pea-k
+	S4	|peak-.
+	S5	|peak.-
+
+	S6	|peak.
+-
+
+	S7	|peak.
+
+-F
+	S8	|peak.
+
+F-i
+--------------------------------
+Name: E17
+	S1	|
+-
+
+	S2	|
+
+-F
+	S3	|
+
+F-i
+	S4	|
+
+Fi-r
+	S5	|
+
+Fir-s
+	S6	|
+
+Firs-t
+	S7	|
+
+First- 
+	S8	|
+
+First -C
+--------------------------------
+Name: E18
+	S1	|s-t
+	S2	|st- 
+	S3	|st -C
+	S4	|st C-i
+	S5	|st Ci-t
+	S6	|st Cit-i
+	S7	|st Citi-z
+	S8	|st Citiz-e
+--------------------------------
+Name: E19
+	S1	|t-i
+	S2	|ti-z
+	S3	|tiz-e
+	S4	|tize-n
+	S5	|tizen-:
+	S6	|tizen:-
+
+	S7	|tizen:
+-Y
+	S8	|tizen:
+Y-o
+--------------------------------
+Name: E20
+	S1	|:-
+
+	S2	|:
+-Y
+	S3	|:
+Y-o
+	S4	|:
+Yo-u
+	S5	|:
+You- 
+	S6	|:
+You -a
+	S7	|:
+You a-r
+	S8	|:
+You ar-e
+--------------------------------
+Name: E21
+	S1	| -a
+	S2	| a-r
+	S3	| ar-e
+	S4	| are- 
+	S5	| are -a
+	S6	| are a-l
+	S7	| are al-l
+	S8	| are all- 
+--------------------------------
+Name: E22
+	S1	|a-l
+	S2	|al-l
+	S3	|all- 
+	S4	|all -r
+	S5	|all r-e
+	S6	|all re-s
+	S7	|all res-o
+	S8	|all reso-l
+--------------------------------
+Name: E23
+	S1	|e-s
+	S2	|es-o
+	S3	|eso-l
+	S4	|esol-v
+	S5	|esolv-e
+	S6	|esolve-d
+	S7	|esolved- 
+	S8	|esolved -r
+--------------------------------
+Name: E24
+	S1	|e-d
+	S2	|ed- 
+	S3	|ed -r
+	S4	|ed r-a
+	S5	|ed ra-t
+	S6	|ed rat-h
+	S7	|ed rath-e
+	S8	|ed rathe-r
+--------------------------------
+Name: E25
+	S1	|t-h
+	S2	|th-e
+	S3	|the-r
+	S4	|ther- 
+	S5	|ther -t
+	S6	|ther t-o
+	S7	|ther to- 
+	S8	|ther to -d
+--------------------------------
+Name: E26
+	S1	|t-o
+	S2	|to- 
+	S3	|to -d
+	S4	|to d-i
+	S5	|to di-e
+	S6	|to die- 
+	S7	|to die -t
+	S8	|to die t-h
+--------------------------------
+Name: E27
+	S1	|e- 
+	S2	|e -t
+	S3	|e t-h
+	S4	|e th-a
+	S5	|e tha-n
+	S6	|e than- 
+	S7	|e than -t
+	S8	|e than t-o
+--------------------------------
+Name: E28
+	S1	|n- 
+	S2	|n -t
+	S3	|n t-o
+	S4	|n to- 
+	S5	|n to -f
+	S6	|n to f-a
+	S7	|n to fa-m
+	S8	|n to fam-i
+--------------------------------
+Name: E29
+	S1	|f-a
+	S2	|fa-m
+	S3	|fam-i
+	S4	|fami-s
+	S5	|famis-h
+	S6	|famish-?
+	S7	|famish?-
+
+	S8	|famish?
+-
+
+--------------------------------
+Name: E30
+	S1	|h-?
+	S2	|h?-
+
+	S3	|h?
+-
+
+	S4	|h?
+
+-A
+	S5	|h?
+
+A-l
+	S6	|h?
+
+Al-l
+	S7	|h?
+
+All-:
+	S8	|h?
+
+All:-
+
+--------------------------------
+Name: E31
+	S1	|l-l
+	S2	|ll-:
+	S3	|ll:-
+
+	S4	|ll:
+-R
+	S5	|ll:
+R-e
+	S6	|ll:
+Re-s
+	S7	|ll:
+Res-o
+	S8	|ll:
+Reso-l
+--------------------------------
+Name: E32
+	S1	|e-s
+	S2	|es-o
+	S3	|eso-l
+	S4	|esol-v
+	S5	|esolv-e
+	S6	|esolve-d
+	S7	|esolved-.
+	S8	|esolved.- 
+--------------------------------
+Name: E33
+	S1	|e-d
+	S2	|ed-.
+	S3	|ed.- 
+	S4	|ed. -r
+	S5	|ed. r-e
+	S6	|ed. re-s
+	S7	|ed. res-o
+	S8	|ed. reso-l
+--------------------------------
+Name: E34
+	S1	|e-s
+	S2	|es-o
+	S3	|eso-l
+	S4	|esol-v
+	S5	|esolv-e
+	S6	|esolve-d
+	S7	|esolved-.
+	S8	|esolved.-
+
+--------------------------------
+Name: E35
+	S1	|e-d
+	S2	|ed-.
+	S3	|ed.-
+
+	S4	|ed.
+-
+
+	S5	|ed.
+
+-F
+	S6	|ed.
+
+F-i
+	S7	|ed.
+
+Fi-r
+	S8	|ed.
+
+Fir-s
+--------------------------------
+Name: E36
+	S1	|F-i
+	S2	|Fi-r
+	S3	|Fir-s
+	S4	|Firs-t
+	S5	|First- 
+	S6	|First -C
+	S7	|First C-i
+	S8	|First Ci-t
+--------------------------------
+Name: E37
+	S1	| -C
+	S2	| C-i
+	S3	| Ci-t
+	S4	| Cit-i
+	S5	| Citi-z
+	S6	| Citiz-e
+	S7	| Citize-n
+	S8	| Citizen-:
+--------------------------------
+Name: E38
+	S1	|z-e
+	S2	|ze-n
+	S3	|zen-:
+	S4	|zen:-
+
+	S5	|zen:
+-F
+	S6	|zen:
+F-i
+	S7	|zen:
+Fi-r
+	S8	|zen:
+Fir-s
+--------------------------------
+Name: E39
+	S1	|F-i
+	S2	|Fi-r
+	S3	|Fir-s
+	S4	|Firs-t
+	S5	|First-,
+	S6	|First,- 
+	S7	|First, -y
+	S8	|First, y-o
+--------------------------------
+Name: E40
+	S1	|,- 
+	S2	|, -y
+	S3	|, y-o
+	S4	|, yo-u
+	S5	|, you- 
+	S6	|, you -k
+	S7	|, you k-n
+	S8	|, you kn-o
+--------------------------------
+Name: E41
+	S1	| -k
+	S2	| k-n
+	S3	| kn-o
+	S4	| kno-w
+	S5	| know- 
+	S6	| know -C
+	S7	| know C-a
+	S8	| know Ca-i
+--------------------------------
+Name: E42
+	S1	| -C
+	S2	| C-a
+	S3	| Ca-i
+	S4	| Cai-u
+	S5	| Caiu-s
+	S6	| Caius- 
+	S7	| Caius -M
+	S8	| Caius M-a
+--------------------------------
+Name: E43
+	S1	|s- 
+	S2	|s -M
+	S3	|s M-a
+	S4	|s Ma-r
+	S5	|s Mar-c
+	S6	|s Marc-i
+	S7	|s Marci-u
+	S8	|s Marciu-s
+--------------------------------
+Name: E44
+	S1	|c-i
+	S2	|ci-u
+	S3	|ciu-s
+	S4	|cius- 
+	S5	|cius -i
+	S6	|cius i-s
+	S7	|cius is- 
+	S8	|cius is -c
+--------------------------------
+Name: E45
+	S1	|i-s
+	S2	|is- 
+	S3	|is -c
+	S4	|is c-h
+	S5	|is ch-i
+	S6	|is chi-e
+	S7	|is chie-f
+	S8	|is chief- 
+--------------------------------
+Name: E46
+	S1	|i-e
+	S2	|ie-f
+	S3	|ief- 
+	S4	|ief -e
+	S5	|ief e-n
+	S6	|ief en-e
+	S7	|ief ene-m
+	S8	|ief enem-y
+--------------------------------
+Name: E47
+	S1	|n-e
+	S2	|ne-m
+	S3	|nem-y
+	S4	|nemy- 
+	S5	|nemy -t
+	S6	|nemy t-o
+	S7	|nemy to- 
+	S8	|nemy to -t
+--------------------------------
+Name: E48
+	S1	|t-o
+	S2	|to- 
+	S3	|to -t
+	S4	|to t-h
+	S5	|to th-e
+	S6	|to the- 
+	S7	|to the -p
+	S8	|to the p-e
+--------------------------------
+Name: E49
+	S1	|e- 
+	S2	|e -p
+	S3	|e p-e
+	S4	|e pe-o
+	S5	|e peo-p
+	S6	|e peop-l
+	S7	|e peopl-e
+	S8	|e people-.
+--------------------------------
+Name: E50
+	S1	|p-l
+	S2	|pl-e
+	S3	|ple-.
+	S4	|ple.-
+
+	S5	|ple.
+-
+
+	S6	|ple.
+
+-A
+	S7	|ple.
+
+A-l
+	S8	|ple.
+
+Al-l
+--------------------------------
+Name: E51
+	S1	|
+-A
+	S2	|
+A-l
+	S3	|
+Al-l
+	S4	|
+All-:
+	S5	|
+All:-
+
+	S6	|
+All:
+-W
+	S7	|
+All:
+W-e
+	S8	|
+All:
+We- 
+--------------------------------
+Name: E52
+	S1	|
+-W
+	S2	|
+W-e
+	S3	|
+We- 
+	S4	|
+We -k
+	S5	|
+We k-n
+	S6	|
+We kn-o
+	S7	|
+We kno-w
+	S8	|
+We know-'
+--------------------------------
+Name: E53
+	S1	|n-o
+	S2	|no-w
+	S3	|now-'
+	S4	|now'-t
+	S5	|now't-,
+	S6	|now't,- 
+	S7	|now't, -w
+	S8	|now't, w-e
+--------------------------------
+Name: E54
+	S1	|,- 
+	S2	|, -w
+	S3	|, w-e
+	S4	|, we- 
+	S5	|, we -k
+	S6	|, we k-n
+	S7	|, we kn-o
+	S8	|, we kno-w
+--------------------------------
+Name: E55
+	S1	|k-n
+	S2	|kn-o
+	S3	|kno-w
+	S4	|know-'
+	S5	|know'-t
+	S6	|know't-.
+	S7	|know't.-
+
+	S8	|know't.
+-
+
+--------------------------------
+Name: E56
+	S1	|t-.
+	S2	|t.-
+
+	S3	|t.
+-
+
+	S4	|t.
+
+-F
+	S5	|t.
+
+F-i
+	S6	|t.
+
+Fi-r
+	S7	|t.
+
+Fir-s
+	S8	|t.
+
+Firs-t
+--------------------------------
+Name: E57
+	S1	|i-r
+	S2	|ir-s
+	S3	|irs-t
+	S4	|irst- 
+	S5	|irst -C
+	S6	|irst C-i
+	S7	|irst Ci-t
+	S8	|irst Cit-i
+--------------------------------
+Name: E58
+	S1	|C-i
+	S2	|Ci-t
+	S3	|Cit-i
+	S4	|Citi-z
+	S5	|Citiz-e
+	S6	|Citize-n
+	S7	|Citizen-:
+	S8	|Citizen:-
+
+--------------------------------
+Name: E59
+	S1	|e-n
+	S2	|en-:
+	S3	|en:-
+
+	S4	|en:
+-L
+	S5	|en:
+L-e
+	S6	|en:
+Le-t
+	S7	|en:
+Let- 
+	S8	|en:
+Let -u
+--------------------------------
+Name: E60
+	S1	|e-t
+	S2	|et- 
+	S3	|et -u
+	S4	|et u-s
+	S5	|et us- 
+	S6	|et us -k
+	S7	|et us k-i
+	S8	|et us ki-l
+--------------------------------
+Name: E61
+	S1	| -k
+	S2	| k-i
+	S3	| ki-l
+	S4	| kil-l
+	S5	| kill- 
+	S6	| kill -h
+	S7	| kill h-i
+	S8	| kill hi-m
+--------------------------------
+Name: E62
+	S1	| -h
+	S2	| h-i
+	S3	| hi-m
+	S4	| him-,
+	S5	| him,- 
+	S6	| him, -a
+	S7	| him, a-n
+	S8	| him, an-d
+--------------------------------
+Name: E63
+	S1	| -a
+	S2	| a-n
+	S3	| an-d
+	S4	| and- 
+	S5	| and -w
+	S6	| and w-e
+	S7	| and we-'
+	S8	| and we'-l
+--------------------------------
+Name: E64
+	S1	|w-e
+	S2	|we-'
+	S3	|we'-l
+	S4	|we'l-l
+	S5	|we'll- 
+	S6	|we'll -h
+	S7	|we'll h-a
+	S8	|we'll ha-v
+--------------------------------
+Name: E65
+	S1	| -h
+	S2	| h-a
+	S3	| ha-v
+	S4	| hav-e
+	S5	| have- 
+	S6	| have -c
+	S7	| have c-o
+	S8	| have co-r
+--------------------------------
+Name: E66
+	S1	| -c
+	S2	| c-o
+	S3	| co-r
+	S4	| cor-n
+	S5	| corn- 
+	S6	| corn -a
+	S7	| corn a-t
+	S8	| corn at- 
+--------------------------------
+Name: E67
+	S1	| -a
+	S2	| a-t
+	S3	| at- 
+	S4	| at -o
+	S5	| at o-u
+	S6	| at ou-r
+	S7	| at our- 
+	S8	| at our -o
+--------------------------------
+Name: E68
+	S1	|u-r
+	S2	|ur- 
+	S3	|ur -o
+	S4	|ur o-w
+	S5	|ur ow-n
+	S6	|ur own- 
+	S7	|ur own -p
+	S8	|ur own p-r
+--------------------------------
+Name: E69
+	S1	|n- 
+	S2	|n -p
+	S3	|n p-r
+	S4	|n pr-i
+	S5	|n pri-c
+	S6	|n pric-e
+	S7	|n price-.
+	S8	|n price.-
+
+--------------------------------
+Name: E70
+	S1	|c-e
+	S2	|ce-.
+	S3	|ce.-
+
+	S4	|ce.
+-I
+	S5	|ce.
+I-s
+	S6	|ce.
+Is-'
+	S7	|ce.
+Is'-t
+	S8	|ce.
+Is't- 
+--------------------------------
+Name: E71
+	S1	|s-'
+	S2	|s'-t
+	S3	|s't- 
+	S4	|s't -a
+	S5	|s't a- 
+	S6	|s't a -v
+	S7	|s't a v-e
+	S8	|s't a ve-r
+--------------------------------
+Name: E72
+	S1	| -v
+	S2	| v-e
+	S3	| ve-r
+	S4	| ver-d
+	S5	| verd-i
+	S6	| verdi-c
+	S7	| verdic-t
+	S8	| verdict-?
+--------------------------------
+Name: E73
+	S1	|i-c
+	S2	|ic-t
+	S3	|ict-?
+	S4	|ict?-
+
+	S5	|ict?
+-
+
+	S6	|ict?
+
+-A
+	S7	|ict?
+
+A-l
+	S8	|ict?
+
+Al-l
+--------------------------------
+Name: E74
+	S1	|
+-A
+	S2	|
+A-l
+	S3	|
+Al-l
+	S4	|
+All-:
+	S5	|
+All:-
+
+	S6	|
+All:
+-N
+	S7	|
+All:
+N-o
+	S8	|
+All:
+No- 
+--------------------------------
+Name: E75
+	S1	|
+-N
+	S2	|
+N-o
+	S3	|
+No- 
+	S4	|
+No -m
+	S5	|
+No m-o
+	S6	|
+No mo-r
+	S7	|
+No mor-e
+	S8	|
+No more- 
+--------------------------------
+Name: E76
+	S1	|o-r
+	S2	|or-e
+	S3	|ore- 
+	S4	|ore -t
+	S5	|ore t-a
+	S6	|ore ta-l
+	S7	|ore tal-k
+	S8	|ore talk-i
+--------------------------------
+Name: E77
+	S1	|a-l
+	S2	|al-k
+	S3	|alk-i
+	S4	|alki-n
+	S5	|alkin-g
+	S6	|alking- 
+	S7	|alking -o
+	S8	|alking o-n
+--------------------------------
+Name: E78
+	S1	|g- 
+	S2	|g -o
+	S3	|g o-n
+	S4	|g on-'
+	S5	|g on'-t
+	S6	|g on't-;
+	S7	|g on't;- 
+	S8	|g on't; -l
+--------------------------------
+Name: E79
+	S1	|t-;
+	S2	|t;- 
+	S3	|t; -l
+	S4	|t; l-e
+	S5	|t; le-t
+	S6	|t; let- 
+	S7	|t; let -i
+	S8	|t; let i-t
+--------------------------------
+Name: E80
+	S1	|t- 
+	S2	|t -i
+	S3	|t i-t
+	S4	|t it- 
+	S5	|t it -b
+	S6	|t it b-e
+	S7	|t it be- 
+	S8	|t it be -d
+--------------------------------
+Name: E81
+	S1	|b-e
+	S2	|be- 
+	S3	|be -d
+	S4	|be d-o
+	S5	|be do-n
+	S6	|be don-e
+	S7	|be done-:
+	S8	|be done:- 
+--------------------------------
+Name: E82
+	S1	|n-e
+	S2	|ne-:
+	S3	|ne:- 
+	S4	|ne: -a
+	S5	|ne: a-w
+	S6	|ne: aw-a
+	S7	|ne: awa-y
+	S8	|ne: away-,
+--------------------------------
+Name: E83
+	S1	|w-a
+	S2	|wa-y
+	S3	|way-,
+	S4	|way,- 
+	S5	|way, -a
+	S6	|way, a-w
+	S7	|way, aw-a
+	S8	|way, awa-y
+--------------------------------
+Name: E84
+	S1	|a-w
+	S2	|aw-a
+	S3	|awa-y
+	S4	|away-!
+	S5	|away!-
+
+	S6	|away!
+-
+
+	S7	|away!
+
+-S
+	S8	|away!
+
+S-e
+--------------------------------
+Name: E85
+	S1	|
+-
+
+	S2	|
+
+-S
+	S3	|
+
+S-e
+	S4	|
+
+Se-c
+	S5	|
+
+Sec-o
+	S6	|
+
+Seco-n
+	S7	|
+
+Secon-d
+	S8	|
+
+Second- 
+--------------------------------
+Name: E86
+	S1	|o-n
+	S2	|on-d
+	S3	|ond- 
+	S4	|ond -C
+	S5	|ond C-i
+	S6	|ond Ci-t
+	S7	|ond Cit-i
+	S8	|ond Citi-z
+--------------------------------
+Name: E87
+	S1	|i-t
+	S2	|it-i
+	S3	|iti-z
+	S4	|itiz-e
+	S5	|itize-n
+	S6	|itizen-:
+	S7	|itizen:-
+
+	S8	|itizen:
+-O
+--------------------------------
+Name: E88
+	S1	|n-:
+	S2	|n:-
+
+	S3	|n:
+-O
+	S4	|n:
+O-n
+	S5	|n:
+On-e
+	S6	|n:
+One- 
+	S7	|n:
+One -w
+	S8	|n:
+One w-o
+--------------------------------
+Name: E89
+	S1	|e- 
+	S2	|e -w
+	S3	|e w-o
+	S4	|e wo-r
+	S5	|e wor-d
+	S6	|e word-,
+	S7	|e word,- 
+	S8	|e word, -g
+--------------------------------
+Name: E90
+	S1	|d-,
+	S2	|d,- 
+	S3	|d, -g
+	S4	|d, g-o
+	S5	|d, go-o
+	S6	|d, goo-d
+	S7	|d, good- 
+	S8	|d, good -c
+--------------------------------
+Name: E91
+	S1	|o-d
+	S2	|od- 
+	S3	|od -c
+	S4	|od c-i
+	S5	|od ci-t
+	S6	|od cit-i
+	S7	|od citi-z
+	S8	|od citiz-e
+--------------------------------
+Name: E92
+	S1	|t-i
+	S2	|ti-z
+	S3	|tiz-e
+	S4	|tize-n
+	S5	|tizen-s
+	S6	|tizens-.
+	S7	|tizens.-
+
+	S8	|tizens.
+-
+
+--------------------------------
+Name: E93
+	S1	|s-.
+	S2	|s.-
+
+	S3	|s.
+-
+
+	S4	|s.
+
+-F
+	S5	|s.
+
+F-i
+	S6	|s.
+
+Fi-r
+	S7	|s.
+
+Fir-s
+	S8	|s.
+
+Firs-t
+--------------------------------
+Name: E94
+	S1	|i-r
+	S2	|ir-s
+	S3	|irs-t
+	S4	|irst- 
+	S5	|irst -C
+	S6	|irst C-i
+	S7	|irst Ci-t
+	S8	|irst Cit-i
+--------------------------------
+Name: E95
+	S1	|C-i
+	S2	|Ci-t
+	S3	|Cit-i
+	S4	|Citi-z
+	S5	|Citiz-e
+	S6	|Citize-n
+	S7	|Citizen-:
+	S8	|Citizen:-
+
+--------------------------------
+Name: E96
+	S1	|e-n
+	S2	|en-:
+	S3	|en:-
+
+	S4	|en:
+-W
+	S5	|en:
+W-e
+	S6	|en:
+We- 
+	S7	|en:
+We -a
+	S8	|en:
+We a-r
+--------------------------------
+Name: E97
+	S1	|e- 
+	S2	|e -a
+	S3	|e a-r
+	S4	|e ar-e
+	S5	|e are- 
+	S6	|e are -a
+	S7	|e are a-c
+	S8	|e are ac-c
+--------------------------------
+Name: E98
+	S1	| -a
+	S2	| a-c
+	S3	| ac-c
+	S4	| acc-o
+	S5	| acco-u
+	S6	| accou-n
+	S7	| accoun-t
+	S8	| account-e
+--------------------------------
+Name: E99
+	S1	|u-n
+	S2	|un-t
+	S3	|unt-e
+	S4	|unte-d
+	S5	|unted- 
+	S6	|unted -p
+	S7	|unted p-o
+	S8	|unted po-o
+--------------------------------
+Name: E100
+	S1	| -p
+	S2	| p-o
+	S3	| po-o
+	S4	| poo-r
+	S5	| poor- 
+	S6	| poor -c
+	S7	| poor c-i
+	S8	| poor ci-t
+--------------------------------
+Name: E101
+	S1	| -c
+	S2	| c-i
+	S3	| ci-t
+	S4	| cit-i
+	S5	| citi-z
+	S6	| citiz-e
+	S7	| citize-n
+	S8	| citizen-s
+--------------------------------
+Name: E102
+	S1	|z-e
+	S2	|ze-n
+	S3	|zen-s
+	S4	|zens-,
+	S5	|zens,- 
+	S6	|zens, -t
+	S7	|zens, t-h
+	S8	|zens, th-e
+--------------------------------
+Name: E103
+	S1	| -t
+	S2	| t-h
+	S3	| th-e
+	S4	| the- 
+	S5	| the -p
+	S6	| the p-a
+	S7	| the pa-t
+	S8	| the pat-r
+--------------------------------
+Name: E104
+	S1	|p-a
+	S2	|pa-t
+	S3	|pat-r
+	S4	|patr-i
+	S5	|patri-c
+	S6	|patric-i
+	S7	|patrici-a
+	S8	|patricia-n
+--------------------------------
+Name: E105
+	S1	|c-i
+	S2	|ci-a
+	S3	|cia-n
+	S4	|cian-s
+	S5	|cians- 
+	S6	|cians -g
+	S7	|cians g-o
+	S8	|cians go-o
+--------------------------------
+Name: E106
+	S1	| -g
+	S2	| g-o
+	S3	| go-o
+	S4	| goo-d
+	S5	| good-.
+	S6	| good.-
+
+	S7	| good.
+-W
+	S8	| good.
+W-h
+--------------------------------
+Name: E107
+	S1	|.-
+
+	S2	|.
+-W
+	S3	|.
+W-h
+	S4	|.
+Wh-a
+	S5	|.
+Wha-t
+	S6	|.
+What- 
+	S7	|.
+What -a
+	S8	|.
+What a-u
+--------------------------------
+Name: E108
+	S1	|t- 
+	S2	|t -a
+	S3	|t a-u
+	S4	|t au-t
+	S5	|t aut-h
+	S6	|t auth-o
+	S7	|t autho-r
+	S8	|t author-i
+--------------------------------
+Name: E109
+	S1	|h-o
+	S2	|ho-r
+	S3	|hor-i
+	S4	|hori-t
+	S5	|horit-y
+	S6	|hority- 
+	S7	|hority -s
+	S8	|hority s-u
+--------------------------------
+Name: E110
+	S1	|y- 
+	S2	|y -s
+	S3	|y s-u
+	S4	|y su-r
+	S5	|y sur-f
+	S6	|y surf-e
+	S7	|y surfe-i
+	S8	|y surfei-t
+--------------------------------
+Name: E111
+	S1	|f-e
+	S2	|fe-i
+	S3	|fei-t
+	S4	|feit-s
+	S5	|feits- 
+	S6	|feits -o
+	S7	|feits o-n
+	S8	|feits on- 
+--------------------------------
+Name: E112
+	S1	| -o
+	S2	| o-n
+	S3	| on- 
+	S4	| on -w
+	S5	| on w-o
+	S6	| on wo-u
+	S7	| on wou-l
+	S8	| on woul-d
+--------------------------------
+Name: E113
+	S1	|o-u
+	S2	|ou-l
+	S3	|oul-d
+	S4	|ould- 
+	S5	|ould -r
+	S6	|ould r-e
+	S7	|ould re-l
+	S8	|ould rel-i
+--------------------------------
+Name: E114
+	S1	|r-e
+	S2	|re-l
+	S3	|rel-i
+	S4	|reli-e
+	S5	|relie-v
+	S6	|reliev-e
+	S7	|relieve- 
+	S8	|relieve -u
+--------------------------------
+Name: E115
+	S1	|v-e
+	S2	|ve- 
+	S3	|ve -u
+	S4	|ve u-s
+	S5	|ve us-:
+	S6	|ve us:- 
+	S7	|ve us: -i
+	S8	|ve us: i-f
+--------------------------------
+Name: E116
+	S1	|:- 
+	S2	|: -i
+	S3	|: i-f
+	S4	|: if- 
+	S5	|: if -t
+	S6	|: if t-h
+	S7	|: if th-e
+	S8	|: if the-y
+--------------------------------
+Name: E117
+	S1	|t-h
+	S2	|th-e
+	S3	|the-y
+	S4	|they-
+
+	S5	|they
+-w
+	S6	|they
+w-o
+	S7	|they
+wo-u
+	S8	|they
+wou-l
+--------------------------------
+Name: E118
+	S1	|w-o
+	S2	|wo-u
+	S3	|wou-l
+	S4	|woul-d
+	S5	|would- 
+	S6	|would -y
+	S7	|would y-i
+	S8	|would yi-e
+--------------------------------
+Name: E119
+	S1	| -y
+	S2	| y-i
+	S3	| yi-e
+	S4	| yie-l
+	S5	| yiel-d
+	S6	| yield- 
+	S7	| yield -u
+	S8	| yield u-s
+--------------------------------
+Name: E120
+	S1	|d- 
+	S2	|d -u
+	S3	|d u-s
+	S4	|d us- 
+	S5	|d us -b
+	S6	|d us b-u
+	S7	|d us bu-t
+	S8	|d us but- 
+--------------------------------
+Name: E121
+	S1	|b-u
+	S2	|bu-t
+	S3	|but- 
+	S4	|but -t
+	S5	|but t-h
+	S6	|but th-e
+	S7	|but the- 
+	S8	|but the -s
+--------------------------------
+Name: E122
+	S1	|h-e
+	S2	|he- 
+	S3	|he -s
+	S4	|he s-u
+	S5	|he su-p
+	S6	|he sup-e
+	S7	|he supe-r
+	S8	|he super-f
+--------------------------------
+Name: E123
+	S1	|p-e
+	S2	|pe-r
+	S3	|per-f
+	S4	|perf-l
+	S5	|perfl-u
+	S6	|perflu-i
+	S7	|perflui-t
+	S8	|perfluit-y
+--------------------------------
+Name: E124
+	S1	|u-i
+	S2	|ui-t
+	S3	|uit-y
+	S4	|uity-,
+	S5	|uity,- 
+	S6	|uity, -w
+	S7	|uity, w-h
+	S8	|uity, wh-i
+--------------------------------
+Name: E125
+	S1	| -w
+	S2	| w-h
+	S3	| wh-i
+	S4	| whi-l
+	S5	| whil-e
+	S6	| while- 
+	S7	| while -i
+	S8	| while i-t
+--------------------------------
+Name: E126
+	S1	|e- 
+	S2	|e -i
+	S3	|e i-t
+	S4	|e it- 
+	S5	|e it -w
+	S6	|e it w-e
+	S7	|e it we-r
+	S8	|e it wer-e
+--------------------------------
+Name: E127
+	S1	|w-e
+	S2	|we-r
+	S3	|wer-e
+	S4	|were-
+
+	S5	|were
+-w
+	S6	|were
+w-h
+	S7	|were
+wh-o
+	S8	|were
+who-l
+--------------------------------
+Name: E128
+	S1	|w-h
+	S2	|wh-o
+	S3	|who-l
+	S4	|whol-e
+	S5	|whole-s
+	S6	|wholes-o
+	S7	|wholeso-m
+	S8	|wholesom-e
+--------------------------------
+Name: E129
+	S1	|s-o
+	S2	|so-m
+	S3	|som-e
+	S4	|some-,
+	S5	|some,- 
+	S6	|some, -w
+	S7	|some, w-e
+	S8	|some, we- 
+--------------------------------
+Name: E130
+	S1	| -w
+	S2	| w-e
+	S3	| we- 
+	S4	| we -m
+	S5	| we m-i
+	S6	| we mi-g
+	S7	| we mig-h
+	S8	| we migh-t
+--------------------------------
+Name: E131
+	S1	|i-g
+	S2	|ig-h
+	S3	|igh-t
+	S4	|ight- 
+	S5	|ight -g
+	S6	|ight g-u
+	S7	|ight gu-e
+	S8	|ight gue-s
+--------------------------------
+Name: E132
+	S1	|g-u
+	S2	|gu-e
+	S3	|gue-s
+	S4	|gues-s
+	S5	|guess- 
+	S6	|guess -t
+	S7	|guess t-h
+	S8	|guess th-e
+--------------------------------
+Name: E133
+	S1	| -t
+	S2	| t-h
+	S3	| th-e
+	S4	| the-y
+	S5	| they- 
+	S6	| they -r
+	S7	| they r-e
+	S8	| they re-l
+--------------------------------
+Name: E134
+	S1	| -r
+	S2	| r-e
+	S3	| re-l
+	S4	| rel-i
+	S5	| reli-e
+	S6	| relie-v
+	S7	| reliev-e
+	S8	| relieve-d
+--------------------------------
+Name: E135
+	S1	|e-v
+	S2	|ev-e
+	S3	|eve-d
+	S4	|eved- 
+	S5	|eved -u
+	S6	|eved u-s
+	S7	|eved us- 
+	S8	|eved us -h
+--------------------------------
+Name: E136
+	S1	|u-s
+	S2	|us- 
+	S3	|us -h
+	S4	|us h-u
+	S5	|us hu-m
+	S6	|us hum-a
+	S7	|us huma-n
+	S8	|us human-e
+--------------------------------
+Name: E137
+	S1	|m-a
+	S2	|ma-n
+	S3	|man-e
+	S4	|mane-l
+	S5	|manel-y
+	S6	|manely-;
+	S7	|manely;-
+
+	S8	|manely;
+-b
+--------------------------------
+Name: E138
+	S1	|y-;
+	S2	|y;-
+
+	S3	|y;
+-b
+	S4	|y;
+b-u
+	S5	|y;
+bu-t
+	S6	|y;
+but- 
+	S7	|y;
+but -t
+	S8	|y;
+but t-h
+--------------------------------
+Name: E139
+	S1	|t- 
+	S2	|t -t
+	S3	|t t-h
+	S4	|t th-e
+	S5	|t the-y
+	S6	|t they- 
+	S7	|t they -t
+	S8	|t they t-h
+--------------------------------
+Name: E140
+	S1	|y- 
+	S2	|y -t
+	S3	|y t-h
+	S4	|y th-i
+	S5	|y thi-n
+	S6	|y thin-k
+	S7	|y think- 
+	S8	|y think -w
+--------------------------------
+Name: E141
+	S1	|n-k
+	S2	|nk- 
+	S3	|nk -w
+	S4	|nk w-e
+	S5	|nk we- 
+	S6	|nk we -a
+	S7	|nk we a-r
+	S8	|nk we ar-e
+--------------------------------
+Name: E142
+	S1	| -a
+	S2	| a-r
+	S3	| ar-e
+	S4	| are- 
+	S5	| are -t
+	S6	| are t-o
+	S7	| are to-o
+	S8	| are too- 
+--------------------------------
+Name: E143
+	S1	|t-o
+	S2	|to-o
+	S3	|too- 
+	S4	|too -d
+	S5	|too d-e
+	S6	|too de-a
+	S7	|too dea-r
+	S8	|too dear-:
+--------------------------------
+Name: E144
+	S1	|e-a
+	S2	|ea-r
+	S3	|ear-:
+	S4	|ear:- 
+	S5	|ear: -t
+	S6	|ear: t-h
+	S7	|ear: th-e
+	S8	|ear: the- 
+--------------------------------
+Name: E145
+	S1	|t-h
+	S2	|th-e
+	S3	|the- 
+	S4	|the -l
+	S5	|the l-e
+	S6	|the le-a
+	S7	|the lea-n
+	S8	|the lean-n
+--------------------------------
+Name: E146
+	S1	|e-a
+	S2	|ea-n
+	S3	|ean-n
+	S4	|eann-e
+	S5	|eanne-s
+	S6	|eannes-s
+	S7	|eanness- 
+	S8	|eanness -t
+--------------------------------
+Name: E147
+	S1	|s-s
+	S2	|ss- 
+	S3	|ss -t
+	S4	|ss t-h
+	S5	|ss th-a
+	S6	|ss tha-t
+	S7	|ss that-
+
+	S8	|ss that
+-a
+--------------------------------
+Name: E148
+	S1	|a-t
+	S2	|at-
+
+	S3	|at
+-a
+	S4	|at
+a-f
+	S5	|at
+af-f
+	S6	|at
+aff-l
+	S7	|at
+affl-i
+	S8	|at
+affli-c
+--------------------------------
+Name: E149
+	S1	|f-l
+	S2	|fl-i
+	S3	|fli-c
+	S4	|flic-t
+	S5	|flict-s
+	S6	|flicts- 
+	S7	|flicts -u
+	S8	|flicts u-s
+--------------------------------
+Name: E150
+	S1	|s- 
+	S2	|s -u
+	S3	|s u-s
+	S4	|s us-,
+	S5	|s us,- 
+	S6	|s us, -t
+	S7	|s us, t-h
+	S8	|s us, th-e
+--------------------------------
+Name: E151
+	S1	| -t
+	S2	| t-h
+	S3	| th-e
+	S4	| the- 
+	S5	| the -o
+	S6	| the o-b
+	S7	| the ob-j
+	S8	| the obj-e
+--------------------------------
+Name: E152
+	S1	|o-b
+	S2	|ob-j
+	S3	|obj-e
+	S4	|obje-c
+	S5	|objec-t
+	S6	|object- 
+	S7	|object -o
+	S8	|object o-f
+--------------------------------
+Name: E153
+	S1	|t- 
+	S2	|t -o
+	S3	|t o-f
+	S4	|t of- 
+	S5	|t of -o
+	S6	|t of o-u
+	S7	|t of ou-r
+	S8	|t of our- 
+--------------------------------
+Name: E154
+	S1	|o-u
+	S2	|ou-r
+	S3	|our- 
+	S4	|our -m
+	S5	|our m-i
+	S6	|our mi-s
+	S7	|our mis-e
+	S8	|our mise-r
+--------------------------------
+Name: E155
+	S1	|i-s
+	S2	|is-e
+	S3	|ise-r
+	S4	|iser-y
+	S5	|isery-,
+	S6	|isery,- 
+	S7	|isery, -i
+	S8	|isery, i-s
+--------------------------------
+Name: E156
+	S1	|,- 
+	S2	|, -i
+	S3	|, i-s
+	S4	|, is- 
+	S5	|, is -a
+	S6	|, is a-s
+	S7	|, is as- 
+	S8	|, is as -a
+--------------------------------
+Name: E157
+	S1	|a-s
+	S2	|as- 
+	S3	|as -a
+	S4	|as a-n
+	S5	|as an-
+
+	S6	|as an
+-i
+	S7	|as an
+i-n
+	S8	|as an
+in-v
+--------------------------------
+Name: E158
+	S1	|
+-i
+	S2	|
+i-n
+	S3	|
+in-v
+	S4	|
+inv-e
+	S5	|
+inve-n
+	S6	|
+inven-t
+	S7	|
+invent-o
+	S8	|
+invento-r
+--------------------------------
+Name: E159
+	S1	|n-t
+	S2	|nt-o
+	S3	|nto-r
+	S4	|ntor-y
+	S5	|ntory- 
+	S6	|ntory -t
+	S7	|ntory t-o
+	S8	|ntory to- 
+--------------------------------
+Name: E160
+	S1	| -t
+	S2	| t-o
+	S3	| to- 
+	S4	| to -p
+	S5	| to p-a
+	S6	| to pa-r
+	S7	| to par-t
+	S8	| to part-i
+--------------------------------
+Name: E161
+	S1	|a-r
+	S2	|ar-t
+	S3	|art-i
+	S4	|arti-c
+	S5	|artic-u
+	S6	|articu-l
+	S7	|articul-a
+	S8	|articula-r
+--------------------------------
+Name: E162
+	S1	|u-l
+	S2	|ul-a
+	S3	|ula-r
+	S4	|ular-i
+	S5	|ulari-s
+	S6	|ularis-e
+	S7	|ularise- 
+	S8	|ularise -t
+--------------------------------
+Name: E163
+	S1	|s-e
+	S2	|se- 
+	S3	|se -t
+	S4	|se t-h
+	S5	|se th-e
+	S6	|se the-i
+	S7	|se thei-r
+	S8	|se their- 
+--------------------------------
+Name: E164
+	S1	|e-i
+	S2	|ei-r
+	S3	|eir- 
+	S4	|eir -a
+	S5	|eir a-b
+	S6	|eir ab-u
+	S7	|eir abu-n
+	S8	|eir abun-d
+--------------------------------
+Name: E165
+	S1	|b-u
+	S2	|bu-n
+	S3	|bun-d
+	S4	|bund-a
+	S5	|bunda-n
+	S6	|bundan-c
+	S7	|bundanc-e
+	S8	|bundance-;
+--------------------------------
+Name: E166
+	S1	|n-c
+	S2	|nc-e
+	S3	|nce-;
+	S4	|nce;- 
+	S5	|nce; -o
+	S6	|nce; o-u
+	S7	|nce; ou-r
+	S8	|nce; our-
+
+--------------------------------
+Name: E167
+	S1	|o-u
+	S2	|ou-r
+	S3	|our-
+
+	S4	|our
+-s
+	S5	|our
+s-u
+	S6	|our
+su-f
+	S7	|our
+suf-f
+	S8	|our
+suff-e
+--------------------------------
+Name: E168
+	S1	|u-f
+	S2	|uf-f
+	S3	|uff-e
+	S4	|uffe-r
+	S5	|uffer-a
+	S6	|uffera-n
+	S7	|ufferan-c
+	S8	|ufferanc-e
+--------------------------------
+Name: E169
+	S1	|a-n
+	S2	|an-c
+	S3	|anc-e
+	S4	|ance- 
+	S5	|ance -i
+	S6	|ance i-s
+	S7	|ance is- 
+	S8	|ance is -a
+--------------------------------
+Name: E170
+	S1	|i-s
+	S2	|is- 
+	S3	|is -a
+	S4	|is a- 
+	S5	|is a -g
+	S6	|is a g-a
+	S7	|is a ga-i
+	S8	|is a gai-n
+--------------------------------
+Name: E171
+	S1	|g-a
+	S2	|ga-i
+	S3	|gai-n
+	S4	|gain- 
+	S5	|gain -t
+	S6	|gain t-o
+	S7	|gain to- 
+	S8	|gain to -t
+--------------------------------
+Name: E172
+	S1	|t-o
+	S2	|to- 
+	S3	|to -t
+	S4	|to t-h
+	S5	|to th-e
+	S6	|to the-m
+	S7	|to them- 
+	S8	|to them -L
+--------------------------------
+Name: E173
+	S1	|e-m
+	S2	|em- 
+	S3	|em -L
+	S4	|em L-e
+	S5	|em Le-t
+	S6	|em Let- 
+	S7	|em Let -u
+	S8	|em Let u-s
+--------------------------------
+Name: E174
+	S1	|t- 
+	S2	|t -u
+	S3	|t u-s
+	S4	|t us- 
+	S5	|t us -r
+	S6	|t us r-e
+	S7	|t us re-v
+	S8	|t us rev-e
+--------------------------------
+Name: E175
+	S1	|r-e
+	S2	|re-v
+	S3	|rev-e
+	S4	|reve-n
+	S5	|reven-g
+	S6	|reveng-e
+	S7	|revenge- 
+	S8	|revenge -t
+--------------------------------
+Name: E176
+	S1	|g-e
+	S2	|ge- 
+	S3	|ge -t
+	S4	|ge t-h
+	S5	|ge th-i
+	S6	|ge thi-s
+	S7	|ge this- 
+	S8	|ge this -w
+--------------------------------
+Name: E177
+	S1	|i-s
+	S2	|is- 
+	S3	|is -w
+	S4	|is w-i
+	S5	|is wi-t
+	S6	|is wit-h
+	S7	|is with-
+
+	S8	|is with
+-o
+--------------------------------
+Name: E178
+	S1	|t-h
+	S2	|th-
+
+	S3	|th
+-o
+	S4	|th
+o-u
+	S5	|th
+ou-r
+	S6	|th
+our- 
+	S7	|th
+our -p
+	S8	|th
+our p-i
+--------------------------------
+Name: E179
+	S1	|r- 
+	S2	|r -p
+	S3	|r p-i
+	S4	|r pi-k
+	S5	|r pik-e
+	S6	|r pike-s
+	S7	|r pikes-,
+	S8	|r pikes,- 
+--------------------------------
+Name: E180
+	S1	|e-s
+	S2	|es-,
+	S3	|es,- 
+	S4	|es, -e
+	S5	|es, e-r
+	S6	|es, er-e
+	S7	|es, ere- 
+	S8	|es, ere -w
+--------------------------------
+Name: E181
+	S1	|r-e
+	S2	|re- 
+	S3	|re -w
+	S4	|re w-e
+	S5	|re we- 
+	S6	|re we -b
+	S7	|re we b-e
+	S8	|re we be-c
+--------------------------------
+Name: E182
+	S1	| -b
+	S2	| b-e
+	S3	| be-c
+	S4	| bec-o
+	S5	| beco-m
+	S6	| becom-e
+	S7	| become- 
+	S8	| become -r
+--------------------------------
+Name: E183
+	S1	|m-e
+	S2	|me- 
+	S3	|me -r
+	S4	|me r-a
+	S5	|me ra-k
+	S6	|me rak-e
+	S7	|me rake-s
+	S8	|me rakes-:
+--------------------------------
+Name: E184
+	S1	|k-e
+	S2	|ke-s
+	S3	|kes-:
+	S4	|kes:- 
+	S5	|kes: -f
+	S6	|kes: f-o
+	S7	|kes: fo-r
+	S8	|kes: for- 
+--------------------------------
+Name: E185
+	S1	|f-o
+	S2	|fo-r
+	S3	|for- 
+	S4	|for -t
+	S5	|for t-h
+	S6	|for th-e
+	S7	|for the- 
+	S8	|for the -g
+--------------------------------
+Name: E186
+	S1	|h-e
+	S2	|he- 
+	S3	|he -g
+	S4	|he g-o
+	S5	|he go-d
+	S6	|he god-s
+	S7	|he gods- 
+	S8	|he gods -k
+--------------------------------
+Name: E187
+	S1	|d-s
+	S2	|ds- 
+	S3	|ds -k
+	S4	|ds k-n
+	S5	|ds kn-o
+	S6	|ds kno-w
+	S7	|ds know- 
+	S8	|ds know -I
+--------------------------------
+Name: E188
+	S1	|o-w
+	S2	|ow- 
+	S3	|ow -I
+	S4	|ow I-
+
+	S5	|ow I
+-s
+	S6	|ow I
+s-p
+	S7	|ow I
+sp-e
+	S8	|ow I
+spe-a
+--------------------------------
+Name: E189
+	S1	|s-p
+	S2	|sp-e
+	S3	|spe-a
+	S4	|spea-k
+	S5	|speak- 
+	S6	|speak -t
+	S7	|speak t-h
+	S8	|speak th-i
+--------------------------------
+Name: E190
+	S1	| -t
+	S2	| t-h
+	S3	| th-i
+	S4	| thi-s
+	S5	| this- 
+	S6	| this -i
+	S7	| this i-n
+	S8	| this in- 
+--------------------------------
+Name: E191
+	S1	| -i
+	S2	| i-n
+	S3	| in- 
+	S4	| in -h
+	S5	| in h-u
+	S6	| in hu-n
+	S7	| in hun-g
+	S8	| in hung-e
+--------------------------------
+Name: E192
+	S1	|u-n
+	S2	|un-g
+	S3	|ung-e
+	S4	|unge-r
+	S5	|unger- 
+	S6	|unger -f
+	S7	|unger f-o
+	S8	|unger fo-r
+--------------------------------
+Name: E193
+	S1	| -f
+	S2	| f-o
+	S3	| fo-r
+	S4	| for- 
+	S5	| for -b
+	S6	| for b-r
+	S7	| for br-e
+	S8	| for bre-a
+--------------------------------
+Name: E194
+	S1	|b-r
+	S2	|br-e
+	S3	|bre-a
+	S4	|brea-d
+	S5	|bread-,
+	S6	|bread,- 
+	S7	|bread, -n
+	S8	|bread, n-o
+--------------------------------
+Name: E195
+	S1	|,- 
+	S2	|, -n
+	S3	|, n-o
+	S4	|, no-t
+	S5	|, not- 
+	S6	|, not -i
+	S7	|, not i-n
+	S8	|, not in- 
+--------------------------------
+Name: E196
+	S1	| -i
+	S2	| i-n
+	S3	| in- 
+	S4	| in -t
+	S5	| in t-h
+	S6	| in th-i
+	S7	| in thi-r
+	S8	| in thir-s
+--------------------------------
+Name: E197
+	S1	|h-i
+	S2	|hi-r
+	S3	|hir-s
+	S4	|hirs-t
+	S5	|hirst- 
+	S6	|hirst -f
+	S7	|hirst f-o
+	S8	|hirst fo-r
+--------------------------------
+Name: E198
+	S1	| -f
+	S2	| f-o
+	S3	| fo-r
+	S4	| for- 
+	S5	| for -r
+	S6	| for r-e
+	S7	| for re-v
+	S8	| for rev-e
+--------------------------------
+Name: E199
+	S1	|r-e
+	S2	|re-v
+	S3	|rev-e
+	S4	|reve-n
+	S5	|reven-g
+	S6	|reveng-e
+	S7	|revenge-.
+	S8	|revenge.-
+
